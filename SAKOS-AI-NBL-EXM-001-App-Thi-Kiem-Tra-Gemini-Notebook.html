@@ -1,0 +1,916 @@
+<!DOCTYPE html><html lang="vi"><head><meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SAKOS · Hệ thống Ôn tập &amp; Kiểm tra năng lực GEMINI NOTEBOOK (NotebookLM)</title>
+<style>
+:root{--navy:#1B3A6B;--navy-d:#13294C;--red:#C8102E;--gold:#B8860B;--green:#2E7D32;--blue:#1565C0;--teal:#0E7C7B;
+--bg:#F2F5FA;--sub:#D5DEEC;--alt:#F7F9FC;--gray:#5A5A5A;--line:#E2E8F2;--radius:14px;--shadow:0 4px 18px rgba(27,58,107,.10)}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:"Segoe UI",Roboto,Arial,sans-serif;background:var(--bg);color:#1f2a44;line-height:1.55}
+button{font-family:inherit;cursor:pointer;border:none}.hidden{display:none!important}
+a{color:var(--navy)}
+/* ---------- LOGIN ---------- */
+#login{min-height:100vh;display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg,var(--navy),#0c1c38);padding:20px}
+.login-card{background:#fff;border-radius:20px;box-shadow:0 20px 60px rgba(0,0,0,.35);width:100%;max-width:470px;padding:32px}
+.logo{font-size:30px;font-weight:800;letter-spacing:3px;color:var(--navy);text-align:center}.logo span{color:var(--red)}
+.tagline{color:var(--gray);font-size:12.5px;margin:6px 0 4px;text-align:center}
+.iso{font-size:11px;color:var(--gold);font-weight:700;margin-bottom:16px;text-align:center}
+.login-card h2{font-size:16px;margin-bottom:14px;color:var(--navy);text-align:center}
+.field{margin-bottom:11px}.field label{display:block;font-size:13px;font-weight:600;margin-bottom:5px;color:#33415c}
+.field input,.field select,.field textarea{width:100%;padding:11px 13px;border:1.5px solid var(--line);border-radius:10px;font-size:15px;font-family:inherit;background:#fff}
+.field input:focus,.field select:focus{outline:none;border-color:var(--navy)}
+.btn{background:var(--navy);color:#fff;padding:12px 18px;border-radius:10px;font-size:15px;font-weight:600;width:100%;transition:.15s}
+.btn:hover{background:var(--navy-d)}.btn-red{background:var(--red)}.btn-red:hover{background:#a30d25}
+.btn-green{background:var(--green)}.btn-gold{background:var(--gold)}
+.btn-ghost{background:transparent;color:var(--navy);border:1.5px solid var(--navy)}.btn-ghost:hover{background:var(--sub)}
+.btn-sm{width:auto;padding:9px 15px;font-size:13.5px;border-radius:9px}
+.err{color:var(--red);font-size:13px;margin-top:10px;min-height:18px;text-align:center}
+/* ---------- SHELL ---------- */
+header.top{background:var(--navy);color:#fff;display:flex;align-items:center;justify-content:space-between;padding:0 18px;height:58px;box-shadow:var(--shadow);position:sticky;top:0;z-index:30}
+.top .brand{font-weight:800;letter-spacing:1.2px;font-size:17px}.top .brand span{color:#ff7a8a}
+.top .who{display:flex;align-items:center;gap:11px;font-size:13.5px}
+.avatar{width:33px;height:33px;border-radius:50%;background:var(--gold);display:flex;align-items:center;justify-content:center;font-weight:700}
+.role-tag{background:rgba(255,255,255,.16);padding:3px 9px;border-radius:20px;font-size:11px;font-weight:600}
+.layout{display:flex;min-height:calc(100vh - 58px)}
+nav.side{width:228px;background:#fff;border-right:1px solid var(--line);padding:16px 11px;flex-shrink:0}
+nav.side .nav-item{display:flex;align-items:center;gap:10px;padding:11px 13px;border-radius:10px;font-size:14px;font-weight:600;color:#41506b;cursor:pointer;margin-bottom:4px}
+nav.side .nav-item:hover{background:var(--bg)}.nav-item.active{background:var(--navy);color:#fff}.nav-item .ic{font-size:16px}
+.nav-sep{font-size:10px;font-weight:700;color:var(--gray);text-transform:uppercase;letter-spacing:.6px;margin:14px 13px 6px}
+main{flex:1;padding:22px 26px;overflow:auto}
+.page-title{font-size:22px;font-weight:800;color:var(--navy);margin-bottom:4px}
+.page-sub{color:var(--gray);font-size:13.5px;margin-bottom:18px}
+.card{background:#fff;border-radius:var(--radius);box-shadow:var(--shadow);padding:20px 22px;margin-bottom:16px}
+.stat-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:14px;margin-bottom:20px}
+.stat{background:#fff;border-radius:var(--radius);padding:16px 18px;box-shadow:var(--shadow);border-left:5px solid var(--navy)}
+.stat.red{border-color:var(--red)}.stat.green{border-color:var(--green)}.stat.gold{border-color:var(--gold)}.stat.blue{border-color:var(--blue)}
+.stat .num{font-size:27px;font-weight:800;color:var(--navy)}.stat .lbl{font-size:12.5px;color:var(--gray);margin-top:2px}
+.note{background:#FFF8E6;border-left:4px solid var(--gold);padding:12px 15px;border-radius:8px;font-size:13.5px;color:#7a5b00;margin:10px 0}
+.warn{background:#FEE2E2;border-left:4px solid var(--red);padding:12px 15px;border-radius:8px;font-size:13.5px;color:#8a1220;margin:10px 0}
+.info{background:#EEF2F9;border-left:4px solid var(--navy);padding:12px 15px;border-radius:8px;font-size:13.5px;color:#23375e;margin:10px 0}
+.ok{background:#DCFCE7;border-left:4px solid var(--green);padding:12px 15px;border-radius:8px;font-size:13.5px;color:#14532d;margin:10px 0}
+h3.sec{font-size:15.5px;font-weight:800;color:var(--navy);margin:18px 0 9px;padding-bottom:6px;border-bottom:2px solid var(--sub)}
+table.data{width:100%;border-collapse:collapse;background:#fff;border-radius:10px;overflow:hidden;font-size:13.5px}
+table.data th{background:var(--navy);color:#fff;text-align:left;padding:10px 12px;font-size:12.5px}
+table.data td{padding:9px 12px;border-bottom:1px solid var(--line);vertical-align:top}
+table.data tr:nth-child(even) td{background:var(--alt)}
+.pill{font-size:11.5px;font-weight:700;padding:3px 10px;border-radius:20px;white-space:nowrap;display:inline-block}
+.pill.g{background:#DCFCE7;color:#166534}.pill.y{background:#FEF3C7;color:#92400e}.pill.r{background:#FEE2E2;color:#991b1b}.pill.b{background:#DBEAFE;color:#1e40af}.pill.n{background:var(--sub);color:var(--navy)}
+.toolbar{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-bottom:14px}
+.toolbar input,.toolbar select{padding:10px 12px;border:1.5px solid var(--line);border-radius:10px;font-size:14px;background:#fff;font-family:inherit}
+.toolbar input{flex:1;min-width:200px}
+.qbox{background:#fff;border-radius:var(--radius);box-shadow:var(--shadow);padding:20px 22px;margin-bottom:12px}
+.qhead{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:10px;flex-wrap:wrap}
+.qtext{font-weight:700;font-size:15.5px;margin-bottom:12px;line-height:1.5}
+.opt{display:block;padding:11px 14px;border:1.6px solid var(--line);border-radius:10px;margin-bottom:8px;cursor:pointer;font-size:14.5px;background:#fff;transition:.12s}
+.opt:hover{border-color:var(--navy);background:var(--alt)}
+.opt.sel{border-color:var(--navy);background:var(--sub);font-weight:600}
+.opt.correct{border-color:var(--green);background:#DCFCE7}
+.opt.wrong{border-color:var(--red);background:#FEE2E2}
+.opt .k{display:inline-block;width:24px;height:24px;line-height:24px;text-align:center;border-radius:6px;background:var(--sub);color:var(--navy);font-weight:800;font-size:12.5px;margin-right:9px}
+.opt.sel .k{background:var(--navy);color:#fff}.opt.correct .k{background:var(--green);color:#fff}.opt.wrong .k{background:var(--red);color:#fff}
+.exp{background:var(--alt);border-left:4px solid var(--teal);padding:10px 13px;border-radius:8px;font-size:13.5px;color:#204c4b;margin-top:10px}
+/* ---------- EXAM RUNNER ---------- */
+#examBar{position:sticky;top:58px;z-index:25;background:#fff;border:1px solid var(--line);border-radius:12px;padding:11px 16px;display:flex;justify-content:space-between;align-items:center;gap:12px;box-shadow:var(--shadow);margin-bottom:14px;flex-wrap:wrap}
+#clock{font-size:22px;font-weight:800;color:var(--navy);font-variant-numeric:tabular-nums}
+#clock.danger{color:var(--red);animation:blink 1s steps(2) infinite}
+@keyframes blink{50%{opacity:.35}}
+.pbar{height:9px;background:var(--sub);border-radius:6px;overflow:hidden;flex:1;min-width:140px}
+.pbar>i{display:block;height:100%;background:linear-gradient(90deg,var(--green),#43a047);transition:.3s}
+.vcount{font-size:12.5px;font-weight:700;color:var(--red)}
+.exam-mode{user-select:none;-webkit-user-select:none}
+.modal-bg{position:fixed;inset:0;background:rgba(10,20,40,.72);display:flex;align-items:center;justify-content:center;z-index:100;padding:18px}
+.modal{background:#fff;border-radius:16px;max-width:520px;width:100%;padding:26px;box-shadow:0 24px 70px rgba(0,0,0,.4)}
+.modal h3{color:var(--red);font-size:19px;margin-bottom:10px}
+.big-score{font-size:56px;font-weight:800;line-height:1}
+.res-pass{background:#DCFCE7;color:#166534}.res-fail{background:#FEE2E2;color:#991b1b}
+.res-banner{border-radius:14px;padding:22px;text-align:center;margin-bottom:16px}
+.code-box{font-family:"Consolas",monospace;background:var(--navy);color:#fff;padding:8px 14px;border-radius:8px;display:inline-block;letter-spacing:2px;font-weight:700}
+.grid2{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:14px}
+footer.foot{text-align:center;font-size:11.5px;color:var(--gray);padding:14px}
+.menu-btn{display:none;background:transparent;color:#fff;font-size:22px}
+@media(max-width:820px){nav.side{position:fixed;left:-240px;top:58px;bottom:0;transition:.2s;z-index:40}nav.side.open{left:0}.menu-btn{display:block}main{padding:16px 14px}}
+@media print{header.top,nav.side,#examBar,.noprint{display:none!important}main{padding:0}.card{box-shadow:none;border:1px solid #999}body{background:#fff}}
+</style></head><body>
+
+<!-- ================= LOGIN ================= -->
+<div id="login">
+ <div class="login-card">
+  <div class="logo">SAKO<span>S</span></div>
+  <div class="tagline">Hệ thống Ôn tập &amp; Kiểm tra năng lực<br><b>GEMINI NOTEBOOK (NotebookLM)</b></div>
+  <div class="iso">SAKOS-AI-NBL-EXM-001 · Hợp chuẩn ISO 9001:2015 &amp; ISO 22301:2019</div>
+  <h2>Khai báo học viên</h2>
+  <div class="field"><label>Họ và tên <b style="color:#C8102E">*</b></label><input id="fName" placeholder="Nguyễn Văn A" autocomplete="off"></div>
+  <div class="field"><label>Mã nhân viên</label><input id="fCode" placeholder="VD: SKS-1234" autocomplete="off"></div>
+  <div class="field"><label>Bộ phận / Khối <b style="color:#C8102E">*</b></label>
+    <select id="fDept">
+      <option value="">— Chọn bộ phận —</option>
+      <option>Ban Tổng Giám đốc</option><option>Ban Chuyển đổi số &amp; Ứng dụng AI</option>
+      <option>Kinh doanh GT</option><option>Kinh doanh MT</option><option>Kinh doanh E-com</option>
+      <option>Kinh doanh B2B</option><option>Hệ thống Shop</option><option>Xuất khẩu</option>
+      <option>Marketing &amp; Ấn phẩm</option><option>Thiết kế sản phẩm – R&amp;D</option><option>Mua hàng</option>
+      <option>Kế hoạch sản xuất</option><option>Sản xuất – Xưởng</option><option>Kiểm soát chất lượng (QC)</option>
+      <option>Kho vận</option><option>Kế toán – Tài chính</option><option>Hành chính – Nhân sự</option>
+      <option>Công nghệ thông tin</option><option>Khác</option>
+    </select></div>
+  <div class="field"><label>Cấp bậc dự thi <b style="color:#C8102E">*</b></label>
+    <select id="fLevel">
+      <option value="">— Chọn cấp bậc —</option>
+      <option value="QL">Cấp QUẢN LÝ (Ban lãnh đạo, GĐ khối, Trưởng/Phó BP, Tổ trưởng quản lý)</option>
+      <option value="NV">Cấp NHÂN VIÊN (Chuyên viên, nhân viên, kỹ thuật viên, nhân sự trực tiếp)</option>
+    </select></div>
+  <button class="btn" onclick="doLogin()">Vào hệ thống →</button>
+  <div class="err" id="loginErr"></div>
+  <div style="margin-top:14px;border-top:1px solid var(--line);padding-top:12px;font-size:11.5px;color:var(--gray);text-align:center">
+    Ứng dụng chạy hoàn toàn ngoại tuyến trên máy của bạn. Toàn bộ dữ liệu bài làm được lưu tại trình duyệt này.<br>
+    <b>Đề Quản lý:</b> 60 câu / 60 phút · <b>Đề Nhân viên:</b> 45 câu / 45 phút
+  </div>
+ </div>
+</div>
+
+<!-- ================= APP ================= -->
+<div id="app" class="hidden">
+ <header class="top">
+   <div style="display:flex;align-items:center;gap:12px">
+     <button class="menu-btn" onclick="document.querySelector('nav.side').classList.toggle('open')">☰</button>
+     <div class="brand">SAKO<span>S</span> · KIỂM TRA NĂNG LỰC GEMINI NOTEBOOK</div>
+   </div>
+   <div class="who">
+     <div id="whoName"></div><span class="role-tag" id="whoRole"></span>
+     <div class="avatar" id="whoAv"></div>
+     <button class="btn btn-sm btn-ghost" style="background:rgba(255,255,255,.15);color:#fff;border-color:rgba(255,255,255,.4)" onclick="logout()">Thoát</button>
+   </div>
+ </header>
+ <div class="layout">
+   <nav class="side" id="nav"></nav>
+   <main id="view"></main>
+ </div>
+ <footer class="foot">SAKOS-AI-NBL-EXM-001 V1.0 · Ngân hàng <span id="fBank"></span> câu · Tài liệu nội bộ – Lưu hành có kiểm soát<br>Nguồn nội dung: Giáo trình SAKOS-AI-NBL-001 V1.0 (chốt dữ liệu 22/08/2026)</footer>
+</div>
+
+<div id="modalHost"></div>
+
+<script>
+/* ============================================================
+   NGÂN HÀNG CÂU HỎI — 200 CÂU (12 chương)
+   ============================================================ */
+const QB1 = [
+// ================= CHƯƠNG 1 (16 câu) =================
+{id:"C1-01",ch:1,lv:"ALL",d:1,q:"Triết lý cốt lõi của Gemini Notebook (NotebookLM) được phát biểu như thế nào?",o:["Trợ lý AI chỉ biết những gì bạn cho nó biết","Trợ lý AI biết mọi thứ trên Internet","Trợ lý AI tự học từ dữ liệu của người dùng để thông minh hơn","Trợ lý AI thay thế hoàn toàn việc đọc tài liệu"],a:0,e:"Công cụ chỉ trả lời dựa trên đúng những nguồn người dùng nạp vào, kèm trích dẫn về tài liệu gốc.",r:"Ch.1 – 1.1"},
+{id:"C1-02",ch:1,lv:"ALL",d:2,q:"Kiến trúc kỹ thuật lõi của Gemini Notebook là gì?",o:["RAG — Sinh nội dung có truy hồi nguồn","Blockchain phân tán","Học tăng cường từ phản hồi người dùng","Máy tìm kiếm từ khóa truyền thống"],a:0,e:"RAG (Retrieval-Augmented Generation): chia nhỏ và lập chỉ mục nguồn → truy hồi đoạn liên quan → sinh câu trả lời kèm trích dẫn.",r:"Ch.1 – 1.1"},
+{id:"C1-03",ch:1,lv:"ALL",d:2,q:"Ba bước vận hành của kiến trúc RAG theo đúng thứ tự là:",o:["Lập chỉ mục nguồn → Truy hồi đoạn liên quan → Sinh câu trả lời kèm trích dẫn","Sinh câu trả lời → Tìm nguồn chứng minh → Lập chỉ mục","Truy hồi web → Lập chỉ mục → Huấn luyện mô hình","Huấn luyện mô hình → Nén dữ liệu → Trả lời"],a:0,e:"Đúng thứ tự: lập chỉ mục toàn bộ nguồn, truy hồi đoạn liên quan nhất, rồi mới sinh câu trả lời neo vào các đoạn đó.",r:"Ch.1 – 1.1"},
+{id:"C1-04",ch:1,lv:"ALL",d:2,q:"Lợi ích quan trọng nhất mà kiến trúc RAG mang lại cho môi trường quản trị theo ISO là gì?",o:["Mọi câu trả lời đều truy vết được về tài liệu gốc","Câu trả lời luôn dài và chi tiết hơn","Không cần lưu trữ tài liệu gốc nữa","AI tự động phê duyệt tài liệu"],a:0,e:"Khả năng truy vết ngược về nguồn đáp ứng yêu cầu thông tin dạng văn bản của ISO 9001:2015 điều 7.5.",r:"Ch.1 – 1.1"},
+{id:"C1-05",ch:1,lv:"ALL",d:2,q:"Nhận định nào SAI về rủi ro của Gemini Notebook?",o:["Vì có trích dẫn nên câu trả lời luôn chính xác tuyệt đối, không cần kiểm tra","AI vẫn có thể tóm tắt lệch trọng tâm","AI vẫn có thể bỏ sót nguồn không được truy hồi","AI vẫn có thể hiểu sai ngữ cảnh"],a:0,e:"RAG giảm rủi ro bịa đặt nhưng KHÔNG loại bỏ hết. Google không cam kết mọi nguồn đã chọn đều được trích dẫn trong từng câu trả lời.",r:"Ch.1 – 1.1"},
+{id:"C1-06",ch:1,lv:"ALL",d:1,q:"“Hallucination” (ảo giác AI) nghĩa là gì?",o:["AI đưa ra thông tin sai nhưng nghe rất thuyết phục","AI từ chối trả lời câu hỏi","AI trả lời chậm do quá tải","AI trả lời bằng sai ngôn ngữ"],a:0,e:"Đây là rủi ro cố hữu của mô hình ngôn ngữ; RAG giúp giảm nhưng không triệt tiêu.",r:"Ch.1 – Phụ lục A"},
+{id:"C1-07",ch:1,lv:"ALL",d:2,q:"Khác biệt căn bản giữa Gemini Notebook và ChatGPT/Gemini (chat) về nguồn tri thức là:",o:["Notebook CHỈ dùng tài liệu bạn nạp lên; chat dùng tri thức huấn luyện và web","Cả hai đều chỉ dùng tài liệu người dùng nạp","Notebook dùng web, chat dùng tài liệu nội bộ","Không có khác biệt, chỉ khác giao diện"],a:0,e:"Notebook là hệ đóng kín theo nguồn; các trợ lý chat là hệ mở theo tri thức huấn luyện và tìm kiếm.",r:"Ch.1 – 1.3"},
+{id:"C1-08",ch:1,lv:"ALL",d:2,q:"Theo quy tắc chọn công cụ của SAKOS, khi câu trả lời BẮT BUỘC phải nằm trong tài liệu của Công ty thì dùng:",o:["Gemini Notebook","Claude","ChatGPT","Công cụ tạo ảnh AI"],a:0,e:"Notebook là lựa chọn khi cần độ chính xác neo vào tài liệu nội bộ, có trích dẫn.",r:"Ch.1 – 1.3"},
+{id:"C1-09",ch:1,lv:"ALL",d:2,q:"Theo quy tắc chọn công cụ của SAKOS, khi cần SOẠN một văn bản mới, dài, có cấu trúc và lập luận thì ưu tiên:",o:["Claude","Gemini Notebook","Công cụ tạo video AI","Máy tìm kiếm"],a:0,e:"Claude mạnh về suy luận sâu và soạn tài liệu dài; Notebook không sáng tạo ngoài nguồn.",r:"Ch.1 – 1.3"},
+{id:"C1-10",ch:1,lv:"QL",d:3,q:"Quy trình phối hợp công cụ mạnh nhất mà SAKOS khuyến nghị là:",o:["Notebook trích xuất sự thật có trích dẫn → Claude biên soạn văn bản trình ký → con người rà soát và ký","Dùng một công cụ duy nhất cho mọi việc để thống nhất","ChatGPT soạn → Notebook ký duyệt","AI soạn và tự phê duyệt, con người chỉ lưu hồ sơ"],a:0,e:"Mỗi công cụ đảm nhiệm đúng thế mạnh; khâu cuối luôn là con người chịu trách nhiệm.",r:"Ch.1 – 1.3"},
+{id:"C1-11",ch:1,lv:"ALL",d:1,q:"Điểm yếu của Gemini Notebook so với các trợ lý chat đa dụng là:",o:["Không sáng tạo ngoài phạm vi nguồn đã nạp","Không có trích dẫn","Không hỗ trợ tiếng Việt","Không tạo được sản phẩm đa phương tiện"],a:0,e:"Đây vừa là điểm yếu vừa là điểm mạnh: nó bị khóa trong nguồn nên an toàn nhưng không sáng tạo tự do.",r:"Ch.1 – 1.3"},
+{id:"C1-12",ch:1,lv:"ALL",d:2,q:"Lý do nào KHÔNG nằm trong các lý do SAKOS chọn phổ cập Gemini Notebook?",o:["Công cụ có thể thay thế hoàn toàn giảng viên nội bộ","Chi phí khởi điểm bằng không với gói miễn phí","Rào cản kỹ thuật thấp, dễ học","SAKOS có kho tài liệu nội bộ rất lớn phù hợp làm nguồn"],a:0,e:"AI hỗ trợ tạo học liệu, nhưng việc thẩm định và giảng dạy vẫn là của con người.",r:"Ch.1 – 1.2"},
+{id:"C1-13",ch:1,lv:"ALL",d:2,q:"Nguyên tắc Nhân Mã (Centaur) của SAKOS phát biểu là:",o:["AI đề xuất — Con người quyết định — Con người chịu trách nhiệm","AI quyết định — Con người thi hành","Con người đề xuất — AI phê duyệt","AI và con người cùng chịu trách nhiệm ngang nhau"],a:0,e:"Đây là nguyên tắc bất biến trong mọi tài liệu AI của SAKOS.",r:"Ch.1 & Ch.11 – 11.6"},
+{id:"C1-14",ch:1,lv:"ALL",d:2,q:"“Grounding” (neo nguồn) trong ngữ cảnh Gemini Notebook nghĩa là:",o:["Buộc câu trả lời bám vào tài liệu đã cung cấp","Nối đất thiết bị để chống nhiễu","Khóa tài khoản khi phát hiện đăng nhập lạ","Nén tài liệu để tiết kiệm dung lượng"],a:0,e:"Neo nguồn là cơ chế giúp giảm ảo giác AI và tạo ra trích dẫn kiểm chứng được.",r:"Ch.1 & Phụ lục A"},
+{id:"C1-15",ch:1,lv:"ALL",d:1,q:"Gemini Notebook do tổ chức nào phát triển?",o:["Google","OpenAI","Anthropic","Microsoft"],a:0,e:"Sản phẩm của Google, khởi nguồn từ Google Labs năm 2023.",r:"Ch.1 – 1.1; Ch.2 – 2.2"},
+{id:"C1-16",ch:1,lv:"QL",d:3,q:"Vì sao nói Gemini Notebook đặc biệt phù hợp với doanh nghiệp vận hành theo ISO?",o:["Vì mọi khẳng định đều truy vết được về tài liệu gốc, đáp ứng yêu cầu kiểm soát thông tin dạng văn bản","Vì nó tự động cấp chứng nhận ISO cho doanh nghiệp","Vì nó thay thế được đánh giá nội bộ","Vì nó tự động sửa lỗi quy trình"],a:0,e:"Tính truy vết là điểm giao thoa giữa RAG và yêu cầu của ISO 9001:2015 điều 7.5.",r:"Ch.1 – 1.1"},
+
+// ================= CHƯƠNG 2 (14 câu) =================
+{id:"C2-01",ch:2,lv:"ALL",d:1,q:"Từ ngày 16/07/2026, NotebookLM được Google đổi tên chính thức thành:",o:["Gemini Notebook","Google Notebook AI","Project Tailwind","Gemini Studio"],a:0,e:"Đổi tên và logo; bản chất sản phẩm không thay đổi.",r:"Ch.2 – 2.2"},
+{id:"C2-02",ch:2,lv:"ALL",d:2,q:"Địa chỉ truy cập hiện hành của sản phẩm là:",o:["notebook.google.com","notebooklm.google.com (đã ngừng hoạt động)","gemini.google.com/notebook","labs.google/tailwind"],a:0,e:"Cuối tháng 7/2026 địa chỉ chuyển sang notebook.google.com; địa chỉ cũ vẫn tự chuyển hướng.",r:"Ch.2 – 2.2"},
+{id:"C2-03",ch:2,lv:"QL",d:2,q:"Việc đổi tên miền có thể làm hỏng thành phần nào trong hạ tầng của Công ty?",o:["Quy tắc tường lửa/proxy và tiện ích trình duyệt khai báo cứng tên miền cũ","Toàn bộ tài khoản người dùng","Các notebook đã tạo trước đó","Các tệp nguồn đã nạp"],a:0,e:"Dấu trang và liên kết chia sẻ vẫn chạy nhờ chuyển hướng, nhưng cấu hình khai báo cứng tên miền thì phải cập nhật.",r:"Ch.2 – 2.2 & Mở đầu mục 6"},
+{id:"C2-04",ch:2,lv:"ALL",d:2,q:"Bản nâng cấp lớn ngày 08/06/2026 mang lại năng lực đột phá nào?",o:["Mỗi notebook được cấp một máy tính đám mây bảo mật, có thể tự viết và chạy mã để phân tích dữ liệu","Khả năng đăng nhập không cần mật khẩu","Tăng giới hạn tệp lên 2 GB","Chế độ hoạt động ngoại tuyến"],a:0,e:"Đây là thay đổi kiến trúc: từ thuần truy hồi sang có thể tính toán trên dữ liệu đã nạp.",r:"Ch.2 – 2.3"},
+{id:"C2-05",ch:2,lv:"ALL",d:2,q:"Trước bản nâng cấp 6/2026, hạn chế của sản phẩm với một bảng tính là:",o:["Chỉ cho biết bảng tính ghi gì, không thể tính toán trên bảng tính đó","Không đọc được bảng tính","Không hiển thị được trích dẫn","Không hỗ trợ tiếng Việt"],a:0,e:"Sản phẩm trước đó thuần túy truy hồi nội dung; năng lực chạy mã mới cho phép tính toán.",r:"Ch.2 – 2.3"},
+{id:"C2-06",ch:2,lv:"QL",d:3,q:"Tại thời điểm ra mắt 6/2026, năng lực chạy mã áp dụng cho đối tượng nào?",o:["Gói Google AI Ultra và một số phiên bản Workspace doanh nghiệp đủ điều kiện","Toàn bộ người dùng kể cả gói miễn phí","Chỉ tài khoản Education","Chỉ người dùng tại Hoa Kỳ"],a:0,e:"Việc mở rộng cho gói Pro được công bố triển khai dần sau đó — cần kiểm tra thực tế trong tài khoản.",r:"Ch.2 – 2.3"},
+{id:"C2-07",ch:2,lv:"ALL",d:2,q:"Tính năng Deep Research (ra mắt 11/2025) cho phép:",o:["Hệ thống tự tìm nguồn trên web và biên soạn báo cáo có trích dẫn","Nén tài liệu để tiết kiệm dung lượng","Dịch tự động toàn bộ notebook","Khôi phục notebook đã xóa"],a:0,e:"Deep Research giải quyết bài toán “notebook trống” khi người dùng chưa có sẵn tài liệu.",r:"Ch.2 – 2.2; Ch.7 – 7.5"},
+{id:"C2-08",ch:2,lv:"ALL",d:2,q:"Tính năng Data Tables (12/2025) có công dụng chính là:",o:["Biến dữ kiện rải rác trong nguồn thành bảng có cấu trúc, xuất được sang Google Sheets","Tạo bảng chấm công tự động","Đồng bộ dữ liệu với ERP","Vẽ biểu đồ 3D"],a:0,e:"Rất phù hợp cho việc so sánh báo giá và đối chiếu điều khoản hợp đồng.",r:"Ch.2 – 2.2; Ch.7 – 7.3"},
+{id:"C2-09",ch:2,lv:"ALL",d:2,q:"Từ 17/08/2026, tính năng sao chép toàn bộ notebook KHÔNG sao chép nội dung nào?",o:["Lịch sử chat cá nhân và ghi chú của người dùng","Các nguồn đủ điều kiện","Các sản phẩm Studio như Audio, Video, Slide","Tên notebook"],a:0,e:"Bản sao cũng không đồng bộ ngược với bản gốc — cần lưu ý khi cập nhật notebook mẫu.",r:"Ch.2 – 2.2; Ch.4 – 4.3"},
+{id:"C2-10",ch:2,lv:"ALL",d:2,q:"Trong ba nơi cùng gọi là “Notebook”, nơi nào là môi trường làm việc chính thức của CBCNV SAKOS?",o:["Gemini Notebook — ứng dụng độc lập tại notebook.google.com","Notebooks bên trong ứng dụng Gemini","Notebooks trong chế độ AI Mode của Google Tìm kiếm","Bất kỳ nơi nào cũng được, không khác biệt"],a:0,e:"Ứng dụng độc lập có đầy đủ khối Studio và bộ tính năng sâu nhất; các bề mặt khác có chính sách dữ liệu và tính năng khác biệt.",r:"Ch.2 – 2.4"},
+{id:"C2-11",ch:2,lv:"ALL",d:1,q:"Sản phẩm ra mắt thử nghiệm lần đầu năm 2023 dưới tên gọi nào?",o:["Project Tailwind","Project Gemini","Project Bard","Project Antigravity"],a:0,e:"Ra mắt tại Google Labs tháng 5/2023 với tên Project Tailwind.",r:"Ch.2 – 2.2"},
+{id:"C2-12",ch:2,lv:"ALL",d:2,q:"Vì sao giáo trình yêu cầu rà soát cập nhật định kỳ 06 tháng/lần?",o:["Vì Google cập nhật sản phẩm với tần suất trung bình khoảng 6 tuần/lần","Vì tài liệu nội bộ hết hạn sau 6 tháng theo luật","Vì tài khoản tự khóa sau 6 tháng","Vì ISO 9001 quy định cứng chu kỳ 6 tháng cho mọi tài liệu"],a:0,e:"Tính năng và hạn mức thay đổi nhanh; tư duy và kỷ luật bảo mật thì không đổi.",r:"Trang kiểm soát tài liệu; Ch.13 – 13.2"},
+{id:"C2-13",ch:2,lv:"QL",d:3,q:"Vì sao nhiều bài viết trên mạng gán nhầm năng lực chạy mã cho đợt đổi tên tháng 7/2026?",o:["Vì Google cập nhật lại dấu thời gian của bài công bố tháng 6 đúng lúc đổi tên, khiến người đọc sau tưởng là một sự kiện","Vì Google chưa từng công bố tính năng này","Vì hai tính năng được công bố cùng ngày","Vì lỗi dịch thuật tiếng Việt"],a:0,e:"Mốc cần nhớ để kiểm tra quyền truy cập là 08/06/2026, không phải ngày đổi tên.",r:"Ch.2 – 2.2, 2.3"},
+{id:"C2-14",ch:2,lv:"ALL",d:2,q:"Rủi ro lớn nhất khi CBCNV học theo tài liệu hướng dẫn NotebookLM viết năm 2024–2025 là:",o:["Bỏ lỡ hơn một nửa năng lực hiện có và hiểu sai về giới hạn sản phẩm","Không đăng nhập được vào hệ thống","Bị Google khóa tài khoản","Mất toàn bộ dữ liệu đã nạp"],a:0,e:"Sản phẩm đã thay đổi rất lớn từ 10/2025 đến nay.",r:"Ch.2 – 2.1"},
+
+// ================= CHƯƠNG 3 (20 câu) =================
+{id:"C3-01",ch:3,lv:"ALL",d:1,q:"Với công việc của SAKOS, loại tài khoản nào được ưu tiên tuyệt đối?",o:["Tài khoản Google Workspace do Công ty cấp","Gmail cá nhân","Tài khoản dùng chung của bộ phận","Tài khoản khách (guest) không đăng nhập"],a:0,e:"Tài khoản Workspace có bảo vệ dữ liệu cấp doanh nghiệp và kiểm soát của quản trị viên.",r:"Ch.3 – 3.1, 3.3"},
+{id:"C3-02",ch:3,lv:"ALL",d:2,q:"Số nguồn tối đa cho MỘT notebook ở gói Standard (miễn phí) là:",o:["50","100","300","600"],a:0,e:"Standard 50 · Plus 100 · Pro 300 · Ultra 500–600 nguồn mỗi notebook.",r:"Ch.3 – 3.2"},
+{id:"C3-03",ch:3,lv:"ALL",d:2,q:"Giới hạn dung lượng và số từ cho MỘT nguồn tải lên là:",o:["200 MB hoặc 500.000 từ","2 GB hoặc 5 triệu từ","50 MB hoặc 100.000 từ","Không giới hạn"],a:0,e:"Đây là trần cứng, áp dụng cho mọi gói; nâng gói KHÔNG nới được trần này.",r:"Ch.3 – 3.2; Ch.9 – 9.2"},
+{id:"C3-04",ch:3,lv:"ALL",d:2,q:"Số lượt chat mỗi ngày ở gói Standard (miễn phí) là:",o:["50","200","500","Không giới hạn"],a:0,e:"Standard 50 · Plus 200 · Pro 500 · Ultra 2.500–5.000 lượt/ngày.",r:"Ch.3 – 3.2"},
+{id:"C3-05",ch:3,lv:"ALL",d:2,q:"Số Audio Overview mỗi ngày ở gói miễn phí là:",o:["3","6","20","100"],a:0,e:"Standard 3 · Plus 6 · Pro 20 · Ultra 100–200 mỗi ngày.",r:"Ch.3 – 3.2"},
+{id:"C3-06",ch:3,lv:"ALL",d:2,q:"Hạn mức Deep Research ở gói Standard (miễn phí) là:",o:["10 lượt/tháng","10 lượt/ngày","3 lượt/ngày","Không có"],a:0,e:"Gói miễn phí tính theo tháng; các gói trả phí tính theo ngày (3–200 lượt/ngày).",r:"Ch.3 – 3.2; Ch.7 – 7.5"},
+{id:"C3-07",ch:3,lv:"ALL",d:2,q:"Hạn mức NGÀY (chat, Audio, Video…) được đặt lại khi nào?",o:["Sau 24 giờ kể từ thời điểm sử dụng","Đúng 0 giờ theo giờ Việt Nam","Vào thứ Hai hằng tuần","Vào ngày đầu tháng"],a:0,e:"Google mô tả là “sau 24 giờ”, nên coi đây là cửa sổ hạn mức chứ không phải mốc nửa đêm.",r:"Ch.3 – 3.2"},
+{id:"C3-08",ch:3,lv:"ALL",d:3,q:"Nhận định nào ĐÚNG về khác biệt giữa hạn mức dung lượng và hạn mức sử dụng?",o:["Hạn mức dung lượng là trần cố định không tự phục hồi; hạn mức sử dụng được đặt lại theo chu kỳ","Cả hai đều tự phục hồi sau 24 giờ","Cả hai đều là trần cố định","Hạn mức dung lượng phục hồi theo tháng"],a:0,e:"Muốn thêm chỗ chứa thì phải xóa bớt, tổ chức lại hoặc nâng gói.",r:"Ch.3 – 3.2; Ch.9 – 9.2"},
+{id:"C3-09",ch:3,lv:"ALL",d:2,q:"Giới hạn riêng đối với nguồn là Google Slides là:",o:["Tối đa 100 slide mỗi nguồn","Tối đa 50 slide mỗi nguồn","Tối đa 500 slide mỗi nguồn","Không có giới hạn riêng"],a:0,e:"Bài trình chiếu lớn hơn phải tách nhỏ trước khi nạp.",r:"Ch.3 – 3.2; Ch.5 – 5.1"},
+{id:"C3-10",ch:3,lv:"ALL",d:2,q:"Giới hạn riêng đối với nguồn là Google Sheets là:",o:["Tối đa 100.000 token mỗi nguồn","Tối đa 100.000 dòng mỗi nguồn","Tối đa 100 cột mỗi nguồn","Không hỗ trợ Google Sheets"],a:0,e:"Đây là giới hạn theo token, không phải theo số dòng — bảng tính lớn nên rút gọn cột trước khi nạp.",r:"Ch.3 – 3.2; Ch.9 – 9.3"},
+{id:"C3-11",ch:3,lv:"ALL",d:1,q:"Gemini Notebook có hoạt động ngoại tuyến (không có Internet) không?",o:["Không — đây là dịch vụ đám mây, bắt buộc có kết nối","Có — sau khi tải notebook về máy","Có — nếu dùng ứng dụng di động","Có — với gói Ultra"],a:0,e:"Sự phụ thuộc này là một rủi ro liên tục kinh doanh phải quản trị theo ISO 22301.",r:"Ch.3 – 3.1; Ch.11 – 11.5"},
+{id:"C3-12",ch:3,lv:"ALL",d:2,q:"Trên tài khoản Gmail CÁ NHÂN, hành vi nào có thể dẫn tới việc nội dung bị người thật xem lại?",o:["Bấm nút phản hồi thích/không thích đối với câu trả lời","Nạp tệp PDF lên notebook","Tạo Audio Overview","Chia sẻ notebook cho đồng nghiệp"],a:0,e:"Đây là con đường duy nhất khiến ngữ cảnh tương tác có thể được xem lại — tuyệt đối không bấm với nội dung công việc.",r:"Ch.3 – 3.3; Ch.11 – 11.1"},
+{id:"C3-13",ch:3,lv:"ALL",d:2,q:"Trên tài khoản Workspace, nếu người dùng bấm phản hồi thích/không thích thì:",o:["Nội dung vẫn KHÔNG bị người thật xem lại và không dùng để huấn luyện mô hình","Nội dung sẽ bị người thật xem lại như tài khoản cá nhân","Tài khoản bị khóa tạm thời","Notebook bị chuyển sang chế độ công khai"],a:0,e:"Đây chính là lý do bắt buộc dùng tài khoản Workspace cho tài liệu Cấp 2 trở lên.",r:"Ch.3 – 3.3; Ch.11 – 11.1"},
+{id:"C3-14",ch:3,lv:"QL",d:2,q:"Với tài khoản Workspace, ai là người bật/tắt quyền truy cập và mức hạn mức của người dùng?",o:["Quản trị viên Workspace của Công ty","Google tự quyết định theo từng người","Trưởng bộ phận trực tiếp","Người dùng tự cấu hình"],a:0,e:"Đây là lý do Bộ phận CNTT phải công bố “bảng hạn mức thực tế của SAKOS”.",r:"Ch.3 – 3.1, 3.4"},
+{id:"C3-15",ch:3,lv:"QL",d:3,q:"Tài khoản tổ chức (Workspace/Education) được ánh xạ theo cấp truy cập nào?",o:["Standard – More – Higher – Expanded – Highest","Free – Basic – Premium – Enterprise","Bronze – Silver – Gold – Platinum","L0 – L5"],a:0,e:"Không dùng bảng hạn mức cá nhân cho tài khoản tổ chức: ví dụ cấp Expanded có 400 nguồn/notebook và 1.000 lượt chat/ngày.",r:"Ch.3 – 3.4"},
+{id:"C3-16",ch:3,lv:"ALL",d:2,q:"Người dùng tự kiểm tra cấp truy cập của mình bằng cách nào?",o:["Xem huy hiệu (Plus/Pro/Expanded/Ultra) hiển thị cạnh ảnh đại diện trong ứng dụng","Gửi email hỏi Google","Đếm số nguồn đã nạp","Xem hóa đơn thanh toán cá nhân"],a:0,e:"Huy hiệu và thông tin cấp phép từ quản trị viên là căn cứ đáng tin hơn phỏng đoán theo tên miền email.",r:"Ch.3 – 3.4"},
+{id:"C3-17",ch:3,lv:"ALL",d:1,q:"Ứng dụng di động của Gemini Notebook phù hợp nhất cho việc gì?",o:["Nghe podcast, ôn thẻ ghi nhớ, tra cứu nhanh","Tạo bộ slide phức tạp","Quản trị quyền chia sẻ toàn Công ty","Chạy mã phân tích dữ liệu"],a:0,e:"Bản đầy đủ tính năng nằm ở trình duyệt máy tính.",r:"Ch.3 – 3.1"},
+{id:"C3-18",ch:3,lv:"ALL",d:2,q:"Về khả năng hỗ trợ tiếng Việt, phát biểu nào ĐÚNG?",o:["Hỗ trợ nạp nguồn, hỏi – đáp và tạo đầu ra bằng tiếng Việt","Chỉ hỗ trợ nạp nguồn tiếng Việt nhưng trả lời bằng tiếng Anh","Chưa hỗ trợ tiếng Việt","Chỉ hỗ trợ tiếng Việt ở gói Ultra"],a:0,e:"Video Overview còn hỗ trợ khoảng 80 ngôn ngữ thuyết minh.",r:"Ch.3 – 3.1"},
+{id:"C3-19",ch:3,lv:"ALL",d:3,q:"Việc nâng gói KHÔNG mang lại thay đổi nào sau đây?",o:["Nới trần 200 MB / 500.000 từ cho một nguồn đơn lẻ","Tăng số nguồn trên mỗi notebook","Tăng số lượt chat mỗi ngày","Tăng số Audio Overview mỗi ngày"],a:0,e:"Trần một nguồn đơn lẻ là giới hạn sản phẩm, không phải giới hạn thương mại.",r:"Ch.3 – 3.2; Ch.9 – 9.2"},
+{id:"C3-20",ch:3,lv:"QL",d:3,q:"Khi lập kế hoạch mua gói cho các nhóm nhân sự, căn cứ đúng đắn nhất là:",o:["Bảng hạn mức thực tế của SAKOS do Bộ phận CNTT công bố sau khi đối chiếu phiên bản Workspace hiện có","Bảng giá niêm yết trên báo chí","Kinh nghiệm của bộ phận khác","Số lượng nhân sự của bộ phận"],a:0,e:"Phiên bản Workspace, tiện ích bổ sung và cấu hình quản trị quyết định hạn mức thực tế.",r:"Ch.3 – 3.4"},
+];
+const QB2 = [
+// ================= CHƯƠNG 4 (16 câu) =================
+{id:"C4-01",ch:4,lv:"ALL",d:1,q:"Giao diện Gemini Notebook gồm mấy khối chính?",o:["Ba khối: Nguồn – Trò chuyện – Xưởng Studio","Hai khối: Nguồn – Trò chuyện","Bốn khối: Nguồn – Chat – Studio – Báo cáo","Năm khối theo từng loại đầu ra"],a:0,e:"Hiểu đúng ba khối là hiểu 80% công cụ.",r:"Ch.4 – 4.1"},
+{id:"C4-02",ch:4,lv:"ALL",d:1,q:"Khối NGUỒN (Sources) trả lời câu hỏi nào?",o:["“AI được phép biết những gì?”","“Tôi muốn biết điều gì?”","“Tôi muốn tài liệu này trở thành cái gì?”","“Ai được xem notebook này?”"],a:0,e:"Nguồn là phạm vi tri thức mà AI được phép sử dụng.",r:"Ch.4 – 4.1"},
+{id:"C4-03",ch:4,lv:"ALL",d:1,q:"Khối XƯỞNG (Studio) trả lời câu hỏi nào?",o:["“Tôi muốn tài liệu này trở thành cái gì?”","“AI được phép biết những gì?”","“Tôi muốn hỏi gì?”","“Tôi lưu hồ sơ ở đâu?”"],a:0,e:"Studio là nơi biến nguồn thành podcast, video, sơ đồ, slide, bảng dữ liệu, thẻ, đề trắc nghiệm…",r:"Ch.4 – 4.1"},
+{id:"C4-04",ch:4,lv:"ALL",d:2,q:"Theo quy trình bảy bước tạo notebook, việc BẮT BUỘC làm ngay sau khi nạp nguồn là:",o:["Đặt câu hỏi kiểm tra và bấm vào trích dẫn để xác nhận nguồn đã được đọc đúng","Tạo ngay Audio Overview","Chia sẻ notebook cho cả bộ phận","Xóa tệp gốc trên máy tính"],a:0,e:"Kiểm tra nguồn có trích dẫn được không giúp phát hiện “bẫy im lặng”.",r:"Ch.4 – 4.2; Ch.5 – 5.1"},
+{id:"C4-05",ch:4,lv:"ALL",d:2,q:"Kỹ năng nào được xem là quan trọng NHẤT trong thao tác hằng ngày?",o:["Chọn/bỏ chọn nguồn phù hợp cho từng câu hỏi","Đổi màu giao diện","Đổi tên notebook","Tạo nhiều notebook cùng lúc"],a:0,e:"Chỉ chọn nguồn liên quan cho câu trả lời chính xác hơn nhiều so với để chọn tất cả.",r:"Ch.4 – 4.3; Ch.8 – 8.4"},
+{id:"C4-06",ch:4,lv:"ALL",d:2,q:"Chuẩn đặt tên notebook của SAKOS gồm các thành phần nào?",o:["[MÃ BỘ PHẬN] – [CHỦ ĐỀ] – [PHIÊN BẢN/KỲ] – [MỨC MẬT]","[TÊN NGƯỜI TẠO] – [NGÀY]","[SỐ THỨ TỰ] – [TÊN TỆP]","Tự do theo sở thích người dùng"],a:0,e:"Mục đích: truy vết theo ISO 9001:2015 điều 7.5 và tránh nhầm lẫn khi chia sẻ.",r:"Ch.4 – 4.4"},
+{id:"C4-07",ch:4,lv:"ALL",d:2,q:"Tên notebook nào sau đây ĐÚNG chuẩn SAKOS?",o:["MH – SOP Mua hàng bộ 27 quy trình – V1.0 – NỘI BỘ","Tài liệu mới nhất","Notebook của anh Tuấn","SOP (bản chuẩn) final v2 sửa lần cuối"],a:0,e:"Có mã bộ phận, chủ đề, phiên bản và mức mật.",r:"Ch.4 – 4.4"},
+{id:"C4-08",ch:4,lv:"ALL",d:2,q:"Lỗi phổ biến nhất của người mới trong tổ chức notebook là:",o:["Dồn mọi tài liệu vào một notebook khổng lồ","Tạo quá nhiều notebook nhỏ","Đặt tên notebook quá dài","Không tạo Audio Overview"],a:0,e:"Kho quá tạp làm giảm chất lượng truy hồi; nguyên tắc là “một notebook — một chủ đề”.",r:"Ch.4 – 4.5; Ch.8 – 8.6"},
+{id:"C4-09",ch:4,lv:"ALL",d:3,q:"Phát biểu nào ĐÚNG về khả năng truy vấn giữa các notebook?",o:["Không thể truy vấn xuyên nhiều notebook trong cùng một câu trả lời — đây là giới hạn cứng","Có thể truy vấn xuyên notebook nếu nâng gói Pro","Có thể truy vấn xuyên notebook nếu cùng một tài khoản","Có thể nếu bật Deep Research"],a:0,e:"Giải pháp là mô hình “notebook tổng hợp” (kiến trúc ba tầng).",r:"Ch.4 – 4.5; Ch.9 – 9.4"},
+{id:"C4-10",ch:4,lv:"ALL",d:2,q:"Bộ slide do Studio tạo có thể xuất ra định dạng nào?",o:["PPTX với hộp văn bản chỉnh sửa được (và PDF)","Chỉ ảnh PNG","Chỉ xem trực tuyến, không xuất được","Chỉ định dạng Google Docs"],a:0,e:"Data Table xuất Google Sheets; Audio/Video tải về tệp.",r:"Ch.4 – 4.3; Ch.7 – 7.3"},
+{id:"C4-11",ch:4,lv:"ALL",d:2,q:"Data Table xuất sang định dạng nào để tính toán tiếp?",o:["Google Sheets","Google Docs","PowerPoint","PDF có lớp chữ"],a:0,e:"Nhờ đó có thể tiếp tục tính toán, lọc và lập biểu đồ bằng công cụ bảng tính.",r:"Ch.4 – 4.3; Ch.7 – 7.3"},
+{id:"C4-12",ch:4,lv:"ALL",d:2,q:"Tính năng “mục tiêu (goal) và vai (persona)” dùng để làm gì?",o:["Định hướng cách trợ lý trả lời theo góc nhìn và mục đích công việc","Đặt hạn mức sử dụng cho người dùng","Phân quyền chia sẻ notebook","Đổi ngôn ngữ giao diện"],a:0,e:"Ví dụ: “Bạn là chuyên viên QA ngành sản xuất hành lý…”.",r:"Ch.4 – 4.3; Ch.6 – 6.3"},
+{id:"C4-13",ch:4,lv:"ALL",d:1,q:"Ghi chú (notes) trong notebook có tác dụng gì?",o:["Lưu câu trả lời tốt để tái sử dụng và có thể chọn làm ngữ cảnh cho câu hỏi sau","Chỉ để trang trí, không có tác dụng","Thay thế cho nguồn gốc","Tự động gửi cho quản lý"],a:0,e:"Ghi chú là cầu nối giữa kết quả đã kiểm chứng và các phân tích tiếp theo.",r:"Ch.4 – 4.3; Ch.8 – 8.4"},
+{id:"C4-14",ch:4,lv:"QL",d:3,q:"Vì sao tính năng sao chép notebook (8/2026) đặc biệt quan trọng với SAKOS?",o:["Cho phép xây “notebook mẫu” chuẩn rồi nhân bản cho từng bộ phận thay vì dựng lại từ đầu","Cho phép sao lưu dữ liệu ra máy tính cá nhân","Cho phép truy vấn xuyên notebook","Cho phép tăng hạn mức sử dụng"],a:0,e:"Giúp chuẩn hóa cách làm và rút ngắn thời gian triển khai diện rộng.",r:"Ch.2 – 2.2; Ch.4 – 4.3; Ch.8 – 8.4"},
+{id:"C4-15",ch:4,lv:"ALL",d:2,q:"Khi chia sẻ notebook, rủi ro lớn nhất đến từ đâu?",o:["Thao tác chia sẻ của chính người dùng (đặt sai phạm vi, tạo liên kết công khai)","Lỗi hệ thống của Google","Việc nạp quá nhiều nguồn","Việc tạo quá nhiều đầu ra Studio"],a:0,e:"Nguồn giữ riêng tư trừ khi người dùng chủ động chia sẻ — nên rủi ro nằm ở hành vi người dùng.",r:"Ch.11 – 11.1"},
+{id:"C4-16",ch:4,lv:"ALL",d:2,q:"Bước cuối cùng trong quy trình bảy bước tạo notebook là:",o:["Chia sẻ đúng phân quyền hoặc xuất tệp để đưa vào hồ sơ công việc","Xóa nguồn để tiết kiệm dung lượng","Đổi mật khẩu tài khoản","Gửi phản hồi thích/không thích cho Google"],a:0,e:"Kết quả phải được đưa vào quy trình làm việc thực tế mới tạo ra giá trị.",r:"Ch.4 – 4.2"},
+
+// ================= CHƯƠNG 5 (20 câu) =================
+{id:"C5-01",ch:5,lv:"ALL",d:1,q:"Nguyên lý bất di bất dịch về nguồn được phát biểu là:",o:["“Nguồn vào quyết định kết quả ra”","“Càng nhiều nguồn càng tốt”","“Nguồn nào cũng như nhau”","“Nguồn chỉ cần đúng định dạng”"],a:0,e:"Chín mươi phần trăm chất lượng đầu ra được quyết định trước khi gõ câu hỏi đầu tiên.",r:"Ch.5 – mở đầu"},
+{id:"C5-02",ch:5,lv:"ALL",d:2,q:"Loại nguồn nào KHÔNG được hỗ trợ nạp trực tiếp?",o:["Tệp âm thanh lưu trên Google Drive (phải tải về rồi tải lên)","PDF trên máy tính","Liên kết video YouTube công khai có phụ đề","Văn bản dán trực tiếp"],a:0,e:"Âm thanh trên Drive không nhập trực tiếp được — phải tải về máy rồi tải lên dưới dạng tệp âm thanh.",r:"Ch.5 – 5.1"},
+{id:"C5-03",ch:5,lv:"ALL",d:2,q:"Khi nạp nguồn là liên kết web, hệ thống lấy nội dung gì?",o:["Chỉ phần văn bản của trang được liên kết","Toàn bộ trang gồm ảnh, video nhúng và các trang con","Toàn bộ website kể cả nội dung sau tường phí","Ảnh chụp màn hình của trang"],a:0,e:"Không lấy ảnh, nội dung nhúng, trang con hay nội dung sau tường phí.",r:"Ch.5 – 5.1"},
+{id:"C5-04",ch:5,lv:"ALL",d:2,q:"Với nguồn YouTube, hệ thống sử dụng nội dung nào?",o:["Bản chép lời (phụ đề) của video công khai","Toàn bộ khung hình video","Bình luận dưới video","Thông tin kênh đăng tải"],a:0,e:"Video vừa đăng trong 72 giờ có thể chưa dùng được.",r:"Ch.5 – 5.1"},
+{id:"C5-05",ch:5,lv:"ALL",d:3,q:"“Bẫy im lặng” khi nạp nguồn là hiện tượng gì?",o:["Nguồn nạp thành công về kỹ thuật nhưng không dùng được (thiếu quyền, PDF là ảnh, trang bị chặn) mà vẫn chiếm chỗ hạn mức","Nguồn bị xóa tự động sau 24 giờ","Nguồn bị chuyển sang notebook khác","Nguồn phát ra âm thanh cảnh báo"],a:0,e:"Cách phát hiện: đặt câu hỏi mà chỉ nguồn đó trả lời được, xác nhận có trích dẫn đúng nguồn.",r:"Ch.5 – 5.1"},
+{id:"C5-06",ch:5,lv:"ALL",d:2,q:"Với tệp Google Docs/Slides, nội dung nào KHÔNG được nhập vào notebook?",o:["Chú thích (footnote) và bình luận","Bảng biểu trong tài liệu","Tiêu đề các mục","Nội dung phần thân tài liệu"],a:0,e:"Phải chuyển các chú thích quan trọng vào phần thân tài liệu trước khi nạp.",r:"Ch.5 – 5.1"},
+{id:"C5-07",ch:5,lv:"ALL",d:2,q:"Tệp Drive không đủ quyền truy cập sẽ dẫn tới hậu quả gì?",o:["Vẫn chiếm một chỗ nguồn nhưng không bao giờ được trích dẫn","Bị từ chối nạp ngay lập tức và không chiếm chỗ","Được nạp và hiển thị cảnh báo màu đỏ","Tự động xin quyền từ chủ sở hữu"],a:0,e:"Yêu cầu tối thiểu là quyền xem trở lên.",r:"Ch.5 – 5.1"},
+{id:"C5-08",ch:5,lv:"ALL",d:1,q:"Bước ĐẦU TIÊN trong quy trình 5 bước chuẩn hóa tài liệu trước khi nạp là:",o:["Phân loại mật của tài liệu theo 4 cấp","Nén tệp cho nhẹ","Dịch sang tiếng Anh","Đổi tên tệp"],a:0,e:"Tài liệu Cấp 4 – Tuyệt mật KHÔNG được nạp trong mọi trường hợp.",r:"Ch.5 – 5.2; Ch.11 – 11.2"},
+{id:"C5-09",ch:5,lv:"ALL",d:2,q:"Với tài liệu là bản scan (ảnh chụp giấy tờ), cần làm gì trước khi nạp?",o:["Chuyển sang PDF có lớp chữ bằng OCR","Nạp thẳng, hệ thống tự nhận diện chữ viết tay","Chụp lại bằng điện thoại độ phân giải cao","Chuyển sang định dạng PowerPoint"],a:0,e:"Nếu không có lớp chữ, AI không đọc được nội dung — nguồn trở nên vô dụng.",r:"Ch.5 – 5.2"},
+{id:"C5-10",ch:5,lv:"ALL",d:2,q:"Vì sao nên làm sạch tài liệu (bỏ mục lục dài, trang bìa lặp, phụ lục thừa) trước khi nạp?",o:["Vừa tiết kiệm dung lượng vừa tăng độ chính xác truy hồi","Để tệp trông đẹp hơn","Để tránh vi phạm bản quyền","Để giảm thời gian tải lên xuống dưới 1 giây"],a:0,e:"Nội dung nhiễu làm loãng kết quả truy hồi.",r:"Ch.5 – 5.2; Ch.9 – 9.3"},
+{id:"C5-11",ch:5,lv:"ALL",d:2,q:"Đặt tên tệp nguồn có nghĩa mang lại lợi ích gì?",o:["Giúp cả người dùng và AI định vị nguồn khi trích dẫn","Tăng tốc độ xử lý của hệ thống","Tăng hạn mức sử dụng","Tự động phân loại mức mật"],a:0,e:"“SOP-PO-12 Quy trinh danh gia NCC V2.docx” tốt hơn nhiều so với “tai lieu 1.docx”.",r:"Ch.5 – 5.2"},
+{id:"C5-12",ch:5,lv:"ALL",d:2,q:"Khi một tệp vượt quá 500.000 từ hoặc 200 MB, phải xử lý thế nào?",o:["Cắt thành các phần logic theo chương/quý/dòng sản phẩm và đánh số thứ tự","Nâng lên gói Ultra để nạp trọn vẹn","Nén tệp thành ZIP rồi nạp","Bỏ qua, hệ thống tự cắt"],a:0,e:"Nâng gói KHÔNG nới được trần một nguồn đơn lẻ.",r:"Ch.5 – 5.2; Ch.3 – 3.2"},
+{id:"C5-13",ch:5,lv:"QL",d:3,q:"Chiến lược “gộp tài liệu liên quan” có nhược điểm gì?",o:["Mất độ chi tiết khi trích dẫn từng tệp riêng","Làm hỏng định dạng tệp gốc","Vi phạm chính sách của Google","Không tiết kiệm được chỗ nguồn"],a:0,e:"Tiết kiệm chỗ nhưng đánh đổi độ chi tiết của trích dẫn.",r:"Ch.5 – 5.3"},
+{id:"C5-14",ch:5,lv:"QL",d:3,q:"Mô hình “notebook tổng hợp” hoạt động như thế nào?",o:["Xuất bản tóm tắt đã kiểm chứng từ mỗi notebook chuyên đề rồi nạp vào notebook cấp trên, giữ liên kết về nguồn gốc","Gộp tất cả nguồn của mọi notebook vào một notebook duy nhất","Dùng Deep Research để tự tìm lại toàn bộ tài liệu","Chia sẻ chéo notebook cho nhau"],a:0,e:"Đây là cách vượt qua giới hạn không truy vấn xuyên notebook.",r:"Ch.5 – 5.3; Ch.9 – 9.4"},
+{id:"C5-15",ch:5,lv:"ALL",d:3,q:"Phát biểu nào ĐÚNG về quan hệ giữa số lượng nguồn và chất lượng câu trả lời?",o:["Nhiều nguồn hơn không đồng nghĩa câu trả lời tốt hơn; chọn đúng nguồn quan trọng hơn","Càng nhiều nguồn thì câu trả lời càng chính xác","Số nguồn không ảnh hưởng gì tới chất lượng","Chỉ cần đúng 1 nguồn duy nhất trong mọi trường hợp"],a:0,e:"Dung lượng chỉ là điều kiện cần; chọn đúng nguồn mới là điều kiện đủ.",r:"Ch.5 – 5.3; Ch.9 – 9.2"},
+{id:"C5-16",ch:5,lv:"ALL",d:2,q:"Với câu hỏi quan trọng, thao tác nên làm với tập nguồn là:",o:["Thu hẹp xuống mức tối thiểu cần thiết rồi mới hỏi","Chọn toàn bộ nguồn để không bỏ sót","Nạp thêm nguồn từ web bằng Deep Research","Xóa bớt nguồn cũ vĩnh viễn"],a:0,e:"Kỹ thuật này thường cải thiện chất lượng hơn bất kỳ mẹo prompt nào.",r:"Ch.5 – 5.3; Ch.8 – 8.4"},
+{id:"C5-17",ch:5,lv:"ALL",d:2,q:"Loại tài liệu nào TUYỆT ĐỐI không được nạp vào Gemini Notebook?",o:["Tài liệu Cấp 4 – Tuyệt mật","Tài liệu Cấp 1 – Công khai","SOP tác nghiệp đã ban hành","Biên bản họp giao ban thường kỳ"],a:0,e:"Không có ngoại lệ, kể cả bản trích một phần.",r:"Ch.5 – 5.2; Ch.11 – 11.2, 11.3"},
+{id:"C5-18",ch:5,lv:"ALL",d:2,q:"Deep Research khác phần lõi RAG ở điểm căn bản nào?",o:["Nguồn đến từ web và KHÔNG do Công ty kiểm soát","Nguồn được mã hóa mạnh hơn","Không tạo được trích dẫn","Chỉ chạy trên ứng dụng di động"],a:0,e:"Vì vậy mọi nguồn web do hệ thống đề xuất phải được người dùng thẩm định uy tín.",r:"Ch.5 – 5.1; Ch.7 – 7.5"},
+{id:"C5-19",ch:5,lv:"ALL",d:2,q:"Sau khi nạp một nguồn mới, cách kiểm tra nguồn có thực sự dùng được là:",o:["Đặt một câu hỏi mà chỉ nguồn đó trả lời được và xác nhận có trích dẫn đúng nguồn đó","Xem dung lượng tệp hiển thị","Kiểm tra màu biểu tượng nguồn","Tạo thử một Audio Overview"],a:0,e:"Đây là cách duy nhất phát hiện “bẫy im lặng”.",r:"Ch.5 – 5.1"},
+{id:"C5-20",ch:5,lv:"QL",d:2,q:"Khi nào nên chọn phương án nâng gói thay vì tổ chức lại nguồn?",o:["Khi có nhiều nguồn buộc phải giữ riêng biệt và trích dẫn độc lập","Khi có nhiều tệp nhỏ có thể gộp lại được","Khi tệp vượt 200 MB","Khi muốn truy vấn xuyên notebook"],a:0,e:"Nâng gói không giải quyết được trần một nguồn đơn lẻ và cũng không cho truy vấn xuyên notebook.",r:"Ch.5 – 5.3"},
+
+// ================= CHƯƠNG 6 (16 câu) =================
+{id:"C6-01",ch:6,lv:"ALL",d:2,q:"Khi trả lời, hệ thống sử dụng những gì làm đầu vào?",o:["Các nguồn ĐANG ĐƯỢC CHỌN, lịch sử hội thoại và ghi chú nếu được chọn","Toàn bộ nguồn trong tài khoản người dùng","Toàn bộ Internet","Chỉ nguồn được nạp gần nhất"],a:0,e:"Vì vậy thao tác chọn nguồn quyết định trực tiếp chất lượng câu trả lời.",r:"Ch.6 – 6.1"},
+{id:"C6-02",ch:6,lv:"ALL",d:1,q:"Quy tắc “Ba lần bấm” của SAKOS yêu cầu điều gì?",o:["Bấm vào ít nhất ba trích dẫn quan trọng nhất và đọc đoạn gốc trước khi dùng thông tin để ra quyết định","Bấm nút tạo lại câu trả lời ba lần","Hỏi cùng một câu ba lần để đối chiếu","Bấm phản hồi thích ba lần cho câu trả lời tốt"],a:0,e:"Áp dụng trước khi ra quyết định, ký văn bản, báo cáo cấp trên hoặc gửi cho khách hàng.",r:"Ch.6 – 6.1"},
+{id:"C6-03",ch:6,lv:"ALL",d:2,q:"Nếu một câu trả lời KHÔNG có trích dẫn hoặc trích dẫn dẫn tới đoạn không liên quan thì:",o:["Coi như thông tin chưa được xác nhận và phải tự kiểm tra bằng bản gốc","Vẫn dùng được vì AI đã đọc toàn bộ nguồn","Báo lỗi cho Google rồi chờ phản hồi","Xóa notebook và tạo lại"],a:0,e:"Người ký tên vào văn bản là người chịu trách nhiệm — không có ngoại lệ vì “AI nói vậy”.",r:"Ch.6 – 6.1"},
+{id:"C6-04",ch:6,lv:"ALL",d:2,q:"Câu hỏi “Định mức hao hụt vải cho mã ba lô B-2045 là bao nhiêu?” thuộc cấp nào?",o:["Cấp 1 — Truy xuất","Cấp 2 — Tổng hợp","Cấp 3 — Phân tích & đối chiếu","Cấp 4 — Ra quyết định có điều kiện"],a:0,e:"Đây là tìm một dữ kiện cụ thể có sẵn trong tài liệu.",r:"Ch.6 – 6.2"},
+{id:"C6-05",ch:6,lv:"ALL",d:2,q:"Câu hỏi “Đối chiếu ba báo giá: chỉ ra khác biệt về điều khoản thanh toán và thời gian giao hàng” thuộc cấp nào?",o:["Cấp 3 — Phân tích & đối chiếu","Cấp 1 — Truy xuất","Cấp 2 — Tổng hợp","Cấp 4 — Ra quyết định có điều kiện"],a:0,e:"So sánh, phát hiện mâu thuẫn, tìm quy luật là đặc trưng của cấp 3.",r:"Ch.6 – 6.2"},
+{id:"C6-06",ch:6,lv:"QL",d:3,q:"Ở Cấp 4 — Ra quyết định có điều kiện, vai trò của AI là gì?",o:["Lập luận trên dữ liệu và nêu rủi ro để CON NGƯỜI quyết định","Tự đưa ra quyết định cuối cùng","Phê duyệt phương án thay lãnh đạo","Ký thay người có thẩm quyền"],a:0,e:"Đúng tinh thần Nhân Mã: AI đề xuất, con người quyết định và chịu trách nhiệm.",r:"Ch.6 – 6.2; Ch.11 – 11.6"},
+{id:"C6-07",ch:6,lv:"ALL",d:2,q:"Đặt vai (persona) cho trợ lý có tác dụng gì?",o:["Định hướng góc nhìn và thuật ngữ chuyên môn khi trả lời","Tăng hạn mức chat mỗi ngày","Khóa nguồn không cho người khác xem","Tự động dịch tài liệu"],a:0,e:"Ví dụ: vai chuyên viên QA sẽ ưu tiên phát hiện rủi ro lỗi và điểm không tuân thủ.",r:"Ch.6 – 6.3"},
+{id:"C6-08",ch:6,lv:"ALL",d:2,q:"Khi hệ thống trả lời “không tìm thấy thông tin trong nguồn”, nguyên nhân KHÔNG phải là:",o:["Hạn mức chat trong ngày đã hết","Nguồn chưa được chọn","Nội dung không có thật trong tài liệu","PDF là ảnh không có lớp chữ"],a:0,e:"Hết hạn mức sẽ chặn việc gửi câu hỏi, không phải trả lời “không tìm thấy”.",r:"Ch.6 – 6.4"},
+{id:"C6-09",ch:6,lv:"ALL",d:2,q:"Khi câu trả lời quá chung chung, thiếu chi tiết, cách xử lý đúng là:",o:["Thu hẹp tập nguồn và chia câu hỏi lớn thành nhiều câu hỏi nhỏ có phạm vi rõ","Nạp thêm thật nhiều nguồn","Hỏi lại y hệt câu cũ nhiều lần","Chuyển sang ứng dụng di động"],a:0,e:"Chọn quá nhiều nguồn và câu hỏi quá rộng là hai nguyên nhân chính.",r:"Ch.6 – 6.4"},
+{id:"C6-10",ch:6,lv:"ALL",d:3,q:"Khi trích dẫn trỏ sai đoạn do tài liệu nhiều cột, nhiều bảng, cách khắc phục là:",o:["Chuyển tài liệu sang định dạng văn bản thuần rồi nạp lại","Bỏ qua vì đây là lỗi hệ thống","Tạo lại notebook mới","Nâng gói lên Ultra"],a:0,e:"Định dạng phức tạp làm giảm chất lượng lập chỉ mục và trích dẫn.",r:"Ch.6 – 6.4"},
+{id:"C6-11",ch:6,lv:"ALL",d:2,q:"Nếu AI trả lời sai các từ viết tắt nội bộ của SAKOS, giải pháp là:",o:["Nạp thêm một nguồn “Bảng thuật ngữ & từ viết tắt SAKOS” vào notebook","Ngừng dùng từ viết tắt trong công ty","Chỉ hỏi bằng tiếng Anh","Báo lỗi cho Google"],a:0,e:"AI chỉ biết những gì có trong nguồn — hãy cung cấp bảng thuật ngữ.",r:"Ch.6 – 6.4"},
+{id:"C6-12",ch:6,lv:"ALL",d:2,q:"Vì sao nên dùng đúng thuật ngữ có trong tài liệu khi đặt câu hỏi?",o:["Vì truy hồi dựa trên nội dung nguồn, dùng sai từ sẽ giảm độ chính xác","Vì hệ thống chỉ hiểu tiếng Việt có dấu","Vì để tiết kiệm token","Vì để tránh vi phạm bản quyền"],a:0,e:"Nếu SOP viết “phiếu yêu cầu vật tư”, đừng hỏi “đơn xin cấp hàng”.",r:"Ch.8 – 8.4; Ch.6 – 6.4"},
+{id:"C6-13",ch:6,lv:"ALL",d:2,q:"Google có cam kết mọi nguồn đã chọn đều được trích dẫn trong từng câu trả lời không?",o:["Không cam kết — vì vậy phải tự rà soát độ phủ nguồn","Có, cam kết 100%","Có, nếu dùng gói trả phí","Có, nếu số nguồn dưới 10"],a:0,e:"Đây là lý do tồn tại của “câu lệnh rà soát độ phủ nguồn”.",r:"Ch.6 – 6.1; Ch.8 – 8.5"},
+{id:"C6-14",ch:6,lv:"ALL",d:2,q:"Lịch sử chat trong Gemini Notebook hiện nay:",o:["Được lưu lại giữa các phiên làm việc","Bị xóa ngay khi đóng trình duyệt","Chỉ lưu ở gói Ultra","Được gửi tự động cho quản trị viên"],a:0,e:"Tính năng lưu lịch sử chat riêng tư đã có từ các bản cập nhật 10/2025 và 3/2026.",r:"Ch.2 – 2.2"},
+{id:"C6-15",ch:6,lv:"ALL",d:2,q:"Với tài liệu nguồn bằng tiếng Anh, muốn nhận câu trả lời tiếng Việt thì phải:",o:["Nêu rõ yêu cầu “trả lời bằng tiếng Việt” trong câu lệnh","Dịch toàn bộ tài liệu trước khi nạp","Đổi ngôn ngữ hệ điều hành","Không thể — hệ thống luôn trả lời theo ngôn ngữ nguồn"],a:0,e:"Nếu không nêu rõ, hệ thống có thể trả lời theo ngôn ngữ của nguồn.",r:"Ch.8 – 8.4"},
+{id:"C6-16",ch:6,lv:"ALL",d:1,q:"Trích dẫn (citation) trong Gemini Notebook có chức năng gì?",o:["Chỉ dẫn tới đúng đoạn trong tài liệu nguồn để người dùng kiểm chứng","Ghi công tác giả tài liệu","Đánh dấu tài liệu đã đọc","Tính phí sử dụng theo lượt"],a:0,e:"Bấm vào số trích dẫn sẽ mở đúng đoạn văn gốc.",r:"Ch.6 – 6.1; Phụ lục A"},
+];
+const QB3 = [
+// ================= CHƯƠNG 7 (24 câu) =================
+{id:"C7-01",ch:7,lv:"ALL",d:1,q:"Khối Studio có công dụng chính là:",o:["Biến cùng một bộ nguồn thành nhiều dạng sản phẩm khác nhau","Lưu trữ hồ sơ chính thức của Công ty","Quản lý người dùng và phân quyền","Đo lường hiệu suất nhân viên"],a:0,e:"Đây là điểm khác biệt lớn nhất của Gemini Notebook so với các công cụ hỏi–đáp tài liệu khác.",r:"Ch.7 – mở đầu"},
+{id:"C7-02",ch:7,lv:"ALL",d:2,q:"Audio Overview là dạng sản phẩm gì?",o:["Podcast hội thoại hai người dẫn thảo luận nội dung nguồn","Bản đọc máy đơn điệu toàn văn tài liệu","Bản ghi âm cuộc họp","Nhạc nền cho video"],a:0,e:"Hỗ trợ tiếng Việt và tùy chỉnh được thời lượng, trọng tâm.",r:"Ch.7 – 7.1, 7.2"},
+{id:"C7-03",ch:7,lv:"ALL",d:2,q:"Vì sao Audio Overview được coi là vũ khí đào tạo mạnh nhất cho khối sản xuất của SAKOS?",o:["Vì phần lớn nhân sự làm việc tại xưởng, ít thời gian ngồi đọc tài liệu dài","Vì nó rẻ hơn các đầu ra khác","Vì nó không tốn hạn mức","Vì nó tự động điểm danh người nghe"],a:0,e:"Nghe podcast đầu ca hoặc trên đường đi làm là kênh truyền tải tri thức hiệu quả nhất với nhóm này.",r:"Ch.7 – 7.2"},
+{id:"C7-04",ch:7,lv:"ALL",d:3,q:"Cách dùng Audio Overview để “tự soi lập luận của mình” là:",o:["Nạp chính đề cương của mình vào rồi tạo podcast và nghe AI thảo luận về ý tưởng đó","Nghe podcast của đối thủ cạnh tranh","Nhờ đồng nghiệp đọc to đề cương","Ghi âm giọng mình rồi phát lại"],a:0,e:"Nghe AI thảo luận về chính ý tưởng của mình giúp phát hiện chỗ chưa logic trước buổi đàm phán/thuyết trình.",r:"Ch.7 – 7.2"},
+{id:"C7-05",ch:7,lv:"ALL",d:2,q:"Video Overview hiện có mấy dạng?",o:["Ba dạng: tiêu chuẩn, ngắn (dọc ~60 giây) và điện ảnh","Một dạng duy nhất","Hai dạng: ngắn và dài","Bốn dạng theo bốn tỷ lệ khung hình"],a:0,e:"Bản điện ảnh (cinematic) có hạn mức riêng và thường mở cho gói cao trước.",r:"Ch.7 – 7.1"},
+{id:"C7-06",ch:7,lv:"ALL",d:2,q:"Mind Map (Sơ đồ tư duy) phù hợp nhất cho mục đích nào?",o:["Nắm nhanh cấu trúc một bộ SOP dài và chuẩn bị khung trình bày","Lưu trữ dữ liệu số để tính toán","Ghi âm ý kiến cuộc họp","Kiểm tra kiến thức học viên"],a:0,e:"Sơ đồ phân nhánh tương tác, bấm mở rộng từng nhánh.",r:"Ch.7 – 7.1, 7.4"},
+{id:"C7-07",ch:7,lv:"ALL",d:2,q:"Sản phẩm Report (Báo cáo) của Studio bao gồm các dạng nào?",o:["Tóm tắt điều hành, tài liệu định hướng, câu hỏi thường gặp, dòng thời gian…","Chỉ bản tóm tắt một trang","Chỉ báo cáo tài chính","Chỉ biên bản họp"],a:0,e:"Rất hữu ích để làm bản tóm tắt cho Ban lãnh đạo hoặc bộ FAQ cho nhân viên mới.",r:"Ch.7 – 7.1"},
+{id:"C7-08",ch:7,lv:"ALL",d:2,q:"Flashcards (Thẻ ghi nhớ) có đặc điểm nào?",o:["Bộ thẻ hỏi – đáp bám sát nguồn, lưu được tiến độ ôn tập","Thẻ nhân viên có mã QR","Thẻ ra vào nhà máy","Bản in tóm tắt tài liệu"],a:0,e:"Phù hợp ôn tiêu chuẩn kỹ thuật, mã vật tư, quy định an toàn cho công nhân mới.",r:"Ch.7 – 7.1, 7.4"},
+{id:"C7-09",ch:7,lv:"ALL",d:2,q:"Quiz (Trắc nghiệm) do Studio tạo có ưu điểm gì so với đề tự soạn thủ công?",o:["Câu hỏi và đáp án bám sát nguồn, có trích dẫn để học viên tự sửa sai","Tự động chấm điểm và xếp loại nhân sự","Tự động cấp chứng chỉ ISO","Không cần người thẩm định"],a:0,e:"Vẫn phải qua thẩm định của người có chuyên môn trước khi dùng chính thức.",r:"Ch.7 – 7.1, 7.4"},
+{id:"C7-10",ch:7,lv:"ALL",d:2,q:"Bộ slide (Slide Deck) do Studio tạo xuất được sang định dạng nào để chỉnh sửa tiếp?",o:["PPTX với hộp văn bản chỉnh sửa được","Chỉ ảnh JPG","Chỉ video MP4","Chỉ Google Form"],a:0,e:"Ngoài ra còn xuất PDF và có thể sửa từng slide riêng.",r:"Ch.7 – 7.1, 7.3"},
+{id:"C7-11",ch:7,lv:"ALL",d:3,q:"Về hạn mức khi chỉnh sửa Slide Deck, phát biểu nào ĐÚNG?",o:["Số lần sửa từng slide không giới hạn, nhưng mỗi lần tạo lại bộ slide đã sửa sẽ sinh bộ mới và tiêu tốn hạn mức","Mỗi lần sửa một slide đều tiêu tốn một lượt hạn mức","Sửa slide hoàn toàn không liên quan hạn mức","Chỉ gói Ultra mới sửa được slide"],a:0,e:"Vì vậy phải gom hết yêu cầu sửa rồi mới tạo lại một lần.",r:"Ch.7 – 7.3; Ch.8 – 8.4"},
+{id:"C7-12",ch:7,lv:"ALL",d:2,q:"Data Table hoạt động theo cách nào?",o:["Người dùng định nghĩa các cột cần có, hệ thống điền các dòng từ nguồn","Hệ thống tự chọn cột, người dùng không can thiệp được","Nhập tay từng dòng như bảng tính thường","Chỉ hiển thị bảng có sẵn trong tài liệu"],a:0,e:"Định nghĩa cột càng rõ, càng ít phải tạo lại; nên kiểm tra ngẫu nhiên vài dòng đối chiếu bản gốc.",r:"Ch.7 – 7.3"},
+{id:"C7-13",ch:7,lv:"ALL",d:2,q:"Quan điểm ĐÚNG về sản phẩm do Studio sinh ra là:",o:["Đó là BẢN NHÁP, phải qua rà soát của người có chuyên môn trước khi sử dụng chính thức","Đó là bản chính thức, dùng ngay được","Đó là tài liệu đã được Google kiểm định","Đó là tài liệu có giá trị pháp lý"],a:0,e:"Riêng số liệu tài chính, thông số kỹ thuật và điều khoản hợp đồng phải đối chiếu 100% với bản gốc.",r:"Ch.7 – 7.3"},
+{id:"C7-14",ch:7,lv:"ALL",d:2,q:"Bộ ba học tập theo chu trình đào tạo khép kín gồm:",o:["Sơ đồ tư duy → Thẻ ghi nhớ → Trắc nghiệm","Podcast → Video → Infographic","Báo cáo → Slide → Data Table","Deep Research → Report → Quiz"],a:0,e:"Tương ứng ba giai đoạn: hiểu → nhớ → kiểm chứng.",r:"Ch.7 – 7.4"},
+{id:"C7-15",ch:7,lv:"ALL",d:2,q:"Trong bộ ba học tập, Thẻ ghi nhớ phục vụ giai đoạn nào?",o:["Giai đoạn “nhớ”","Giai đoạn “hiểu”","Giai đoạn “kiểm chứng”","Giai đoạn “phê duyệt”"],a:0,e:"Sơ đồ tư duy = hiểu; Thẻ ghi nhớ = nhớ; Trắc nghiệm = kiểm chứng.",r:"Ch.7 – 7.4"},
+{id:"C7-16",ch:7,lv:"QL",d:3,q:"Trong mô hình “lớp học một buổi”, vai trò của người quản lý chuyển dịch như thế nào?",o:["Từ “soạn tài liệu” sang “thẩm định và hiệu đính học liệu”","Từ giảng dạy sang quản lý điểm danh","Từ thẩm định sang soạn thảo thủ công","Không thay đổi gì"],a:0,e:"Đúng tinh thần Nhân Mã: AI làm phần thô, con người làm phần phán xét.",r:"Ch.7 – 7.4"},
+{id:"C7-17",ch:7,lv:"QL",d:2,q:"Theo mô hình “lớp học một buổi”, một bộ học liệu đầy đủ được chuẩn bị trong khoảng bao lâu?",o:["Khoảng 30–45 phút","Khoảng 3–5 ngày","Khoảng 2 tuần","Khoảng 2 giờ"],a:0,e:"Gồm 1 sơ đồ tư duy + 1 podcast 12 phút + 30 thẻ + 20 câu trắc nghiệm + 1 bộ slide.",r:"Ch.7 – 7.4; Ch.10 – 10.2"},
+{id:"C7-18",ch:7,lv:"ALL",d:2,q:"Deep Research chỉ được SAKOS cho phép dùng cho loại thông tin nào?",o:["Thông tin công khai: thị trường, xu hướng ngành, tiêu chuẩn quốc tế, đối thủ cạnh tranh","Mọi loại thông tin kể cả tài liệu mật","Dữ liệu nhân sự nội bộ","Số liệu tài chính chưa công bố"],a:0,e:"Tuyệt đối không dùng Deep Research để bổ sung nguồn cho notebook chứa tài liệu mật.",r:"Ch.7 – 7.5"},
+{id:"C7-19",ch:7,lv:"ALL",d:3,q:"Vì sao không được dùng Deep Research trong notebook chứa tài liệu mật?",o:["Vì sẽ trộn lẫn nguồn nội bộ với nguồn ngoài không kiểm soát","Vì sẽ làm chậm hệ thống","Vì sẽ tốn quá nhiều hạn mức","Vì Google sẽ khóa tài khoản"],a:0,e:"Nguyên tắc tách bạch nguồn nội bộ và nguồn ngoài phải được giữ nghiêm.",r:"Ch.7 – 7.5"},
+{id:"C7-20",ch:7,lv:"ALL",d:2,q:"Với nguồn web do Deep Research đề xuất, người dùng phải làm gì?",o:["Thẩm định uy tín nguồn (ưu tiên trang chính thức, hiệp hội ngành, cơ quan nhà nước) trước khi giữ lại","Giữ lại toàn bộ vì hệ thống đã lọc","Xóa hết và tự tìm bằng tay","Chuyển cho Bộ phận CNTT duyệt từng nguồn"],a:0,e:"Nguồn ngoài không do Công ty kiểm soát nên trách nhiệm thẩm định thuộc về người dùng.",r:"Ch.7 – 7.5"},
+{id:"C7-21",ch:7,lv:"ALL",d:2,q:"Infographic của Studio phù hợp nhất cho ứng dụng nào tại SAKOS?",o:["Bảng tin nội bộ, poster nhắc việc dán tại xưởng","Hồ sơ trình ký cho Ban lãnh đạo","Hợp đồng với nhà cung cấp","Báo cáo tài chính quý"],a:0,e:"Đây là dạng đầu ra trực quan để truyền thông nhanh.",r:"Ch.7 – 7.1"},
+{id:"C7-22",ch:7,lv:"ALL",d:2,q:"Mẹo kỹ thuật khi tạo Audio Overview cho công nhân là:",o:["Dùng ô hướng dẫn tùy chỉnh để nêu rõ đối tượng nghe, trọng tâm nội dung, ngôn ngữ và độ dài","Để mặc định vì hệ thống tự hiểu","Tạo nhiều bản rồi chọn bản hay nhất","Chỉ nạp tài liệu tiếng Anh cho chuyên nghiệp"],a:0,e:"Ví dụ: “tập trung vào lỗi thường gặp và cách phòng ngừa, tiếng Việt phổ thông, khoảng 12 phút”.",r:"Ch.7 – 7.2"},
+{id:"C7-23",ch:7,lv:"ALL",d:2,q:"Đầu ra nào KHÔNG thuộc chín nhóm sản phẩm Studio đã học?",o:["Bảng chấm công tự động","Data Table","Infographic","Mind Map"],a:0,e:"Chín nhóm: Audio, Video, Mind Map, Report, Flashcards, Quiz, Infographic, Slide Deck, Data Table.",r:"Ch.7 – 7.1"},
+{id:"C7-24",ch:7,lv:"QL",d:3,q:"Với SAKOS, ý nghĩa chiến lược lớn nhất của khối Studio là gì?",o:["Trở thành “dây chuyền sản xuất học liệu” cho toàn bộ hệ thống đào tạo nội bộ quy mô 500+ CBCNV","Giảm chi phí phần mềm thiết kế","Thay thế bộ phận truyền thông nội bộ","Tự động hóa việc đánh giá nhân sự"],a:0,e:"Một bộ SOP có thể trở thành podcast, video, sơ đồ, thẻ, đề thi và slide.",r:"Ch.7 – mở đầu; Ch.1 – 1.2"},
+
+// ================= CHƯƠNG 8 (18 câu) =================
+{id:"C8-01",ch:8,lv:"ALL",d:2,q:"Vì sao prompt cho Gemini Notebook khác với prompt cho ChatGPT/Claude?",o:["Vì ngữ cảnh đã nằm sẵn trong nguồn, người dùng chỉ cần chỉ rõ lấy từ đâu, làm gì và trình bày ra sao","Vì Notebook chỉ hiểu tiếng Anh","Vì Notebook giới hạn 100 ký tự mỗi câu hỏi","Vì Notebook không hiểu câu dài"],a:0,e:"Prompt cho Notebook ngắn hơn nhưng đòi hỏi chính xác hơn về phạm vi và định dạng.",r:"Ch.8 – 8.1"},
+{id:"C8-02",ch:8,lv:"ALL",d:1,q:"Chữ “C” trong khung RTCRF⁺ phiên bản Notebook là:",o:["Context — Phạm vi nguồn","Content — Nội dung","Control — Kiểm soát","Citation — Trích dẫn"],a:0,e:"Với Notebook, C là chỉ rõ dùng nguồn nào, phần nào, kỳ nào — thay cho việc dán ngữ cảnh.",r:"Ch.8 – 8.1"},
+{id:"C8-03",ch:8,lv:"ALL",d:2,q:"Năm thành phần của khung RTCRF là:",o:["Role – Task – Context – Requirements – Format","Read – Think – Check – Report – Finish","Result – Time – Cost – Risk – Feedback","Review – Test – Control – Record – File"],a:0,e:"Dấu ⁺ bổ sung ví dụ mẫu và thẻ đánh dấu khi cần độ chuẩn xác cao.",r:"Ch.8 – 8.1"},
+{id:"C8-04",ch:8,lv:"ALL",d:2,q:"Trong câu lệnh mẫu, yêu cầu “ghi rõ CHƯA CÓ QUY ĐỊNH thay vì tự suy diễn” thuộc thành phần nào?",o:["Requirements (Yêu cầu)","Role (Vai)","Format (Định dạng)","Task (Nhiệm vụ)"],a:0,e:"Đây là ràng buộc buộc AI thừa nhận khoảng trống dữ liệu — chống suy diễn.",r:"Ch.8 – 8.2"},
+{id:"C8-05",ch:8,lv:"ALL",d:2,q:"Thành phần Format trong câu lệnh có tác dụng gì?",o:["Giúp kết quả dùng được ngay, không phải biên tập lại","Giảm số token tiêu thụ","Tăng tốc độ xử lý của hệ thống","Bảo mật nội dung câu hỏi"],a:0,e:"Ví dụ: bảng mấy cột, danh sách mấy ý, độ dài, ngôn ngữ, đối tượng đọc.",r:"Ch.8 – 8.2"},
+{id:"C8-06",ch:8,lv:"ALL",d:2,q:"Mẹo cải thiện chất lượng câu trả lời MẠNH NHẤT là:",o:["Thu hẹp nguồn trước khi hỏi: bỏ chọn tất cả, chỉ giữ 1–3 nguồn liên quan trực tiếp","Viết câu lệnh thật dài và chi tiết","Hỏi cùng một câu nhiều lần","Nạp thêm nguồn từ web"],a:0,e:"Đây là mẹo hiệu quả hơn bất kỳ kỹ thuật prompt nào khác.",r:"Ch.8 – 8.4"},
+{id:"C8-07",ch:8,lv:"ALL",d:2,q:"Cách hỏi hiệu quả với chủ đề phức tạp là:",o:["Hỏi theo chuỗi: tổng quan → đào sâu từng phần → yêu cầu tổng hợp cuối cùng","Gộp tất cả vào một câu hỏi khổng lồ","Chia thành nhiều notebook khác nhau","Hỏi ngẫu nhiên rồi ghép kết quả"],a:0,e:"Chat có bộ nhớ ngữ cảnh dài nên chuỗi hỏi rất hiệu quả.",r:"Ch.8 – 8.4"},
+{id:"C8-08",ch:8,lv:"ALL",d:2,q:"Câu bổ sung nào giúp chống suy diễn của AI?",o:["“Nếu nguồn không đủ thông tin, hãy nói rõ là không có thay vì suy đoán.”","“Hãy trả lời thật dài và đầy đủ.”","“Hãy tự tin đưa ra kết luận.”","“Hãy dùng kiến thức chung để bổ sung.”"],a:0,e:"Buộc AI thừa nhận giới hạn là kỹ thuật kiểm soát chất lượng cơ bản.",r:"Ch.8 – 8.4"},
+{id:"C8-09",ch:8,lv:"ALL",d:3,q:"Câu lệnh rà soát độ phủ nguồn yêu cầu hệ thống làm gì?",o:["Lập bảng mỗi nguồn một dòng, ghi rõ bằng chứng liên quan kèm trích dẫn hoặc “không tìm thấy nội dung liên quan”","Đếm số từ của mỗi nguồn","Xếp hạng nguồn theo độ tin cậy","Xóa các nguồn không liên quan"],a:0,e:"Dùng trước mọi quyết định quan trọng vì Google không cam kết mọi nguồn đều được trích dẫn.",r:"Ch.8 – 8.5"},
+{id:"C8-10",ch:8,lv:"ALL",d:2,q:"Khi nào nên dùng câu lệnh rà soát độ phủ nguồn?",o:["Trước mọi quyết định quan trọng","Chỉ khi hệ thống báo lỗi","Chỉ ở gói Ultra","Mỗi ngày một lần theo lịch"],a:0,e:"Đây là công cụ kiểm soát chất lượng bắt buộc của SAKOS.",r:"Ch.8 – 8.5"},
+{id:"C8-11",ch:8,lv:"ALL",d:2,q:"Câu lệnh phù hợp để chuẩn bị giao ban là:",o:["“Từ toàn bộ biên bản giao ban, liệt kê các đầu việc đã giao cho bộ phận X mà chưa có ghi nhận hoàn thành, kèm người phụ trách và thời hạn”","“Tóm tắt tài liệu này”","“Hãy cho tôi ý tưởng cải tiến bất kỳ”","“Dịch tài liệu sang tiếng Anh”"],a:0,e:"Câu lệnh nêu rõ nhiệm vụ, phạm vi, trường thông tin cần có và cách sắp xếp.",r:"Ch.8 – 8.3"},
+{id:"C8-12",ch:8,lv:"ALL",d:2,q:"Khi soát hợp đồng, câu lệnh mẫu KHÔNG yêu cầu AI làm việc nào?",o:["Đưa ra tư vấn pháp lý và kết luận hợp đồng có hiệu lực hay không","Liệt kê điều khoản mâu thuẫn nội bộ","Liệt kê điều khoản bất lợi về thanh toán/trách nhiệm","Liệt kê nội dung còn để trống"],a:0,e:"AI chỉ đóng vai người soát lỗi sơ bộ; ý kiến pháp lý thuộc về Bộ phận Pháp chế.",r:"Ch.8 – 8.3; Ch.10 – 10.2"},
+{id:"C8-13",ch:8,lv:"ALL",d:2,q:"Vì sao nên đặt mục tiêu (goal) cho notebook ngay từ đầu?",o:["Để mọi câu trả lời tự động bám mục đích sử dụng của notebook","Để tăng hạn mức chat","Để chia sẻ nhanh hơn","Để hệ thống tự nạp thêm nguồn"],a:0,e:"Ví dụ: “Đây là notebook phục vụ đào tạo hội nhập cho nhân viên mới bộ phận Kho”.",r:"Ch.8 – 8.4"},
+{id:"C8-14",ch:8,lv:"ALL",d:2,q:"Lỗi “coi đầu ra Studio là bản chính thức” gây hậu quả gì?",o:["Sai sót lọt vào hồ sơ và văn bản trình ký","Cạn hạn mức trong ngày","Mất quyền truy cập notebook","Bị Google cảnh cáo"],a:0,e:"Luôn coi đầu ra là bản nháp và phải hiệu đính.",r:"Ch.8 – 8.6; Ch.7 – 7.3"},
+{id:"C8-15",ch:8,lv:"ALL",d:2,q:"Lỗi “tạo lại slide nhiều lần cho từng sửa nhỏ” gây hậu quả gì?",o:["Cạn hạn mức trong ngày","Làm hỏng định dạng slide","Mất trích dẫn nguồn","Bị khóa tính năng Studio vĩnh viễn"],a:0,e:"Cách sửa: gom yêu cầu rồi tạo lại một lần.",r:"Ch.8 – 8.6; Ch.7 – 7.3"},
+{id:"C8-16",ch:8,lv:"ALL",d:2,q:"Trong danh sách mười lỗi thường gặp, lỗi nào liên quan trực tiếp tới vi phạm quy chế bảo mật?",o:["Dùng tài khoản Gmail cá nhân cho tài liệu nội bộ","Đặt tên notebook không theo chuẩn","Hỏi bằng ngôn ngữ khác tài liệu","Nạp bản scan không có lớp chữ"],a:0,e:"Còn một lỗi bảo mật khác là bấm phản hồi thích/không thích trên tài khoản cá nhân.",r:"Ch.8 – 8.6; Ch.11 – 11.3"},
+{id:"C8-17",ch:8,lv:"QL",d:3,q:"Vai trò của thành phần “⁺” (ví dụ mẫu) trong RTCRF⁺ là:",o:["Nêu một ví dụ mẫu về kết quả mong muốn khi cần độ chuẩn xác cao","Bổ sung nguồn mới cho notebook","Tăng thời gian xử lý để kết quả tốt hơn","Cho phép AI tự do sáng tạo"],a:0,e:"Ví dụ mẫu giúp định hình chính xác cấu trúc đầu ra mong muốn.",r:"Ch.8 – 8.1"},
+{id:"C8-18",ch:8,lv:"ALL",d:2,q:"Với tài liệu có nhiều từ viết tắt riêng, giải pháp prompt tốt nhất là:",o:["Nạp bảng thuật ngữ nội bộ như một nguồn riêng trong notebook","Viết đầy đủ mọi từ trong câu hỏi mỗi lần hỏi","Hỏi bằng tiếng Anh cho chuẩn","Bỏ qua vì AI tự suy luận được"],a:0,e:"AI chỉ biết những gì có trong nguồn.",r:"Ch.8 – 8.4; Ch.6 – 6.4"},
+
+// ================= CHƯƠNG 9 (14 câu) =================
+{id:"C9-01",ch:9,lv:"ALL",d:1,q:"Token là gì?",o:["Mẩu nhỏ mà mô hình AI dùng để xử lý văn bản","Mã đăng nhập một lần","Đơn vị tiền tệ để mua gói dịch vụ","Tệp tin đính kèm"],a:0,e:"Nếu văn bản là mô hình lắp ghép thì token là từng viên gạch đơn lẻ.",r:"Ch.9 – 9.1"},
+{id:"C9-02",ch:9,lv:"ALL",d:2,q:"Với tiếng Việt, một từ tương đương khoảng bao nhiêu token?",o:["1,5 – 2 token","0,25 token","4 – 5 token","10 token"],a:0,e:"Từ ghép và dấu thanh làm tăng số token so với tiếng Anh (1 token ≈ 3/4 từ).",r:"Ch.9 – 9.1"},
+{id:"C9-03",ch:9,lv:"ALL",d:2,q:"Một trang A4 chuẩn khoảng 500 từ tương đương khoảng bao nhiêu token?",o:["750 – 1.000 token","100 – 200 token","5.000 – 6.000 token","50.000 token"],a:0,e:"Dùng để ước lượng nhanh dung lượng tài liệu trước khi nạp.",r:"Ch.9 – 9.1"},
+{id:"C9-04",ch:9,lv:"ALL",d:2,q:"Với văn bản kỹ thuật, mã hoặc tiếng nước ngoài xen kẽ, hệ số ước lượng token là:",o:["Khoảng 2,0","Khoảng 0,5","Khoảng 1,0","Khoảng 5,0"],a:0,e:"Thuật ngữ hiếm bị chia nhỏ hơn nên tốn nhiều token hơn.",r:"Ch.9 – 9.1"},
+{id:"C9-05",ch:9,lv:"ALL",d:3,q:"Ba loại giới hạn cần phân biệt gồm:",o:["Giới hạn nguồn đơn lẻ – giới hạn dung lượng notebook – giới hạn sử dụng theo ngày/tháng","Giới hạn tốc độ – giới hạn ngôn ngữ – giới hạn thiết bị","Giới hạn người dùng – giới hạn quốc gia – giới hạn thời gian","Giới hạn giá – giới hạn tính năng – giới hạn hỗ trợ"],a:0,e:"Chỉ nhóm thứ ba mới tự đặt lại theo chu kỳ thời gian.",r:"Ch.9 – 9.2"},
+{id:"C9-06",ch:9,lv:"ALL",d:2,q:"Về “cửa sổ ngữ cảnh 1 triệu token”, phát biểu nào ĐÚNG?",o:["Google công bố mở rộng ngữ cảnh chat từ 10/2025 nhưng KHÔNG công bố một con số ngữ cảnh cố định riêng cho Notebook trong bảng giới hạn chính thức","Đây là con số chính thức áp dụng riêng cho Notebook ở mọi gói","Chỉ gói Ultra mới có 1 triệu token","Con số này quyết định số nguồn tối đa mỗi notebook"],a:0,e:"Notebook còn áp dụng cơ chế chọn nguồn và truy hồi riêng.",r:"Ch.9 – 9.2"},
+{id:"C9-07",ch:9,lv:"ALL",d:2,q:"Kết luận thực dụng cho CBCNV về dung lượng là:",o:["Đừng cố nhồi tối đa; dung lượng lớn là điều kiện cần, chọn đúng nguồn mới là điều kiện đủ","Luôn nạp tối đa số nguồn cho phép","Chỉ nạp đúng một nguồn duy nhất","Nạp bao nhiêu cũng không ảnh hưởng chất lượng"],a:0,e:"Đây là nguyên tắc xuyên suốt Chương 5 và Chương 9.",r:"Ch.9 – 9.2"},
+{id:"C9-08",ch:9,lv:"ALL",d:2,q:"Mẹo tối ưu dung lượng nào sau đây SAI?",o:["Nén tệp thành ZIP trước khi nạp để giảm dung lượng","Loại bỏ mục lục, trang bìa lặp, phụ lục không dùng","Ưu tiên định dạng văn bản thuần thay vì PDF nhiều lớp định dạng","Xóa notebook thử nghiệm hết giá trị"],a:0,e:"Hệ thống cần đọc được nội dung văn bản; nén ZIP không phải giải pháp.",r:"Ch.9 – 9.3"},
+{id:"C9-09",ch:9,lv:"ALL",d:2,q:"Với bảng tính lớn, nên xử lý thế nào trước khi nạp?",o:["Rút gọn còn các cột thực sự cần phân tích (trần 100.000 token/nguồn Sheets)","Chuyển thành ảnh chụp màn hình","Chia thành 100 tệp nhỏ","Nạp nguyên trạng vì không có giới hạn"],a:0,e:"Giới hạn Sheets tính theo token, không theo số dòng.",r:"Ch.9 – 9.3; Ch.3 – 3.2"},
+{id:"C9-10",ch:9,lv:"QL",d:2,q:"Trong kiến trúc tri thức ba tầng, Tầng 1 là gì?",o:["Notebook nghiệp vụ — tài liệu gốc của một bộ phận/chủ đề, do Trưởng bộ phận sở hữu","Notebook điều hành của Ban lãnh đạo","Notebook chuyên đề theo dự án","Kho lưu trữ hồ sơ chính thức của Công ty"],a:0,e:"Tầng 2 là chuyên đề theo dự án/kỳ; Tầng 3 là điều hành.",r:"Ch.9 – 9.4"},
+{id:"C9-11",ch:9,lv:"QL",d:3,q:"Tầng 3 — Notebook điều hành chỉ được chứa nội dung nào?",o:["Các bản tóm tắt ĐÃ ĐƯỢC KIỂM CHỨNG xuất ra từ tầng 1 và 2","Toàn bộ tài liệu gốc của mọi bộ phận","Dữ liệu tài chính chưa công bố","Đầu ra thô của AI chưa qua rà soát"],a:0,e:"Tuyệt đối không sao chép nguyên đầu ra thô của AI lên tầng điều hành.",r:"Ch.9 – 9.4"},
+{id:"C9-12",ch:9,lv:"QL",d:2,q:"Mỗi bản tóm tắt đưa lên tầng cao hơn phải ghi rõ điều gì?",o:["Nguồn gốc: notebook nào, tài liệu nào, ngày nào","Tên người viết prompt","Số token đã tiêu thụ","Thời gian tạo bằng giây"],a:0,e:"Bảo đảm truy vết theo ISO 9001:2015 điều 7.5.",r:"Ch.9 – 9.4"},
+{id:"C9-13",ch:9,lv:"ALL",d:2,q:"Vì sao SAKOS phải áp dụng kiến trúc tri thức ba tầng?",o:["Vì Gemini Notebook không truy vấn xuyên notebook, cần cơ chế để kho tri thức vẫn có tính hệ thống","Vì hạn mức chat mỗi ngày quá thấp","Vì Google yêu cầu doanh nghiệp phải phân tầng","Vì để giảm chi phí thuê bao"],a:0,e:"Đây là giải pháp tổ chức, không phải giải pháp kỹ thuật.",r:"Ch.9 – 9.4; Ch.4 – 4.5"},
+{id:"C9-14",ch:9,lv:"ALL",d:2,q:"Giới hạn nào KHÔNG tự phục hồi theo thời gian?",o:["Số notebook, số nguồn, số từ và dung lượng tệp","Số lượt chat mỗi ngày","Số Audio Overview mỗi ngày","Số lượt Deep Research mỗi tháng"],a:0,e:"Đây là các trần dung lượng — phải xóa bớt, tổ chức lại hoặc nâng gói.",r:"Ch.9 – 9.2; Ch.3 – 3.2"},
+];
+const QB4 = [
+// ================= CHƯƠNG 10 (14 câu) =================
+{id:"C10-01",ch:10,lv:"ALL",d:2,q:"Với Bộ phận Mua hàng, ứng dụng tiêu biểu nhất của Gemini Notebook là:",o:["So sánh báo giá bằng Data Table và soát điều khoản bất lợi trong hợp đồng","Thiết kế mẫu vali mới","Tính lương cho công nhân","Điều phối xe giao hàng"],a:0,e:"Nguồn nên nạp: bộ SOP mua hàng, danh sách nhà cung cấp, hợp đồng khung, báo giá.",r:"Ch.10 – 10.1"},
+{id:"C10-02",ch:10,lv:"ALL",d:2,q:"Với Bộ phận Kho vận, ứng dụng phù hợp nhất là:",o:["Tạo thẻ ghi nhớ mã vật tư cho nhân viên mới và podcast quy trình an toàn","Phân tích biên lợi nhuận theo dòng sản phẩm","Thiết kế bao bì sản phẩm","Đàm phán hợp đồng xuất khẩu"],a:0,e:"Nguồn nên nạp: quy trình nhập – xuất, hướng dẫn an toàn, báo cáo tồn kho.",r:"Ch.10 – 10.1"},
+{id:"C10-03",ch:10,lv:"ALL",d:3,q:"Với Bộ phận Kế toán – Tài chính, lưu ý ĐẶC BIỆT khi dùng Gemini Notebook là:",o:["Số liệu phải được tự kiểm 100%; AI chỉ hỗ trợ tra cứu quy định và tóm tắt văn bản","AI có thể thay thế kiểm toán nội bộ","Có thể nạp mọi số liệu tài chính kể cả chưa công bố","Kết quả AI có giá trị pháp lý như báo cáo đã ký"],a:0,e:"Số liệu kế toán – tài chính bắt buộc được người có chuyên môn xác nhận.",r:"Ch.10 – 10.1; Ch.7 – 7.3"},
+{id:"C10-04",ch:10,lv:"ALL",d:2,q:"Với Bộ phận QC, ứng dụng tiêu biểu là:",o:["Lập bảng đối chiếu dạng lỗi – công đoạn – biện pháp phòng ngừa và tạo bộ trắc nghiệm kiểm tra nhận thức","Lập kế hoạch truyền thông sản phẩm","Đàm phán giá nguyên liệu","Tính toán lương sản phẩm"],a:0,e:"Nguồn nên nạp: tiêu chuẩn kiểm tra, hồ sơ lỗi, báo cáo NCR, phản hồi khiếu nại.",r:"Ch.10 – 10.1"},
+{id:"C10-05",ch:10,lv:"ALL",d:2,q:"Trong Quy trình 1 “Sổ tay SOP sống”, bước đầu tiên là:",o:["Tập hợp SOP/JD/biểu mẫu, phân loại mật và loại bỏ tài liệu Tuyệt mật","Tạo ngay Audio Overview cho cả bộ phận","Chia sẻ notebook công khai","Mua gói Pro cho toàn bộ phận"],a:0,e:"Phân loại mật luôn là bước đầu tiên trong mọi quy trình nạp nguồn.",r:"Ch.10 – 10.2"},
+{id:"C10-06",ch:10,lv:"QL",d:2,q:"Trong Quy trình 1, ai là người thẩm định và hiệu đính học liệu trước khi phổ biến?",o:["Trưởng bộ phận","Hạt nhân AI của bộ phận","Bộ phận CNTT","Nhân viên mới của bộ phận"],a:0,e:"Hạt nhân AI dựng học liệu; Trưởng bộ phận chịu trách nhiệm thẩm định và phê duyệt.",r:"Ch.10 – 10.2"},
+{id:"C10-07",ch:10,lv:"ALL",d:2,q:"Kết quả kỳ vọng của Quy trình “Sổ tay SOP sống” là gì?",o:["Thời gian tra cứu quy trình giảm từ hàng chục phút xuống dưới một phút, rút ngắn thời gian hội nhập","Giảm số lượng SOP phải ban hành","Không cần đào tạo trực tiếp nữa","Thay thế hệ thống quản lý tài liệu ISO"],a:0,e:"Notebook là công cụ khai thác, không thay thế hệ thống lưu trữ hồ sơ chính thức.",r:"Ch.10 – 10.2; Ch.11 – 11.5"},
+{id:"C10-08",ch:10,lv:"ALL",d:3,q:"Khi ghi âm cuộc họp để nạp vào notebook, yêu cầu bắt buộc là:",o:["Phải thông báo và có sự đồng thuận của người tham dự","Chỉ cần thông báo cho Trưởng bộ phận","Không cần thông báo nếu là họp nội bộ","Chỉ cần ghi chú trong biên bản sau"],a:0,e:"Đây vừa là yêu cầu đạo đức vừa liên quan tới bảo vệ dữ liệu cá nhân.",r:"Ch.10 – 10.2"},
+{id:"C10-09",ch:10,lv:"ALL",d:2,q:"Trong Quy trình 2, câu hỏi cuối quý “Đầu việc nào đã giao nhưng chưa từng được báo cáo hoàn thành?” đòi hỏi điều kiện gì?",o:["Nạp toàn bộ biên bản của quý vào cùng một notebook","Nâng gói lên Ultra","Bật Deep Research","Chia mỗi biên bản thành một notebook riêng"],a:0,e:"Vì hệ thống không truy vấn xuyên notebook nên các biên bản cần nằm chung một notebook.",r:"Ch.10 – 10.2; Ch.4 – 4.5"},
+{id:"C10-10",ch:10,lv:"ALL",d:2,q:"Trong Quy trình 3 “Trợ lý soát hồ sơ, hợp đồng”, kết quả đầu ra được chuyển cho ai?",o:["Bộ phận Pháp chế / Ban lãnh đạo xem xét — AI chỉ soát lỗi sơ bộ","Trực tiếp gửi cho đối tác để ký","Lưu thẳng vào hồ sơ hợp đồng đã duyệt","Công bố nội bộ toàn Công ty"],a:0,e:"AI không thay thế ý kiến pháp lý.",r:"Ch.10 – 10.2"},
+{id:"C10-11",ch:10,lv:"ALL",d:2,q:"Trong Quy trình 5 “kể chuyện nghề”, nhân sự hiện trường được đề nghị làm gì mỗi tuần?",o:["Dành 5 phút ghi âm một tình huống khó đã xử lý: hiện tượng – nguyên nhân – cách xử lý – bài học","Viết báo cáo 3 trang về công việc","Chụp ảnh toàn bộ khu vực làm việc","Tự tạo một bộ slide đào tạo"],a:0,e:"Đây là cách rẻ nhất và ít phiền hà nhất để giữ lại tri thức của thợ lành nghề.",r:"Ch.10 – 10.2"},
+{id:"C10-12",ch:10,lv:"QL",d:3,q:"Vì sao Quy trình 5 có giá trị chiến lược với một nhà máy?",o:["Vì tri thức quý nhất nằm trong đầu thợ lành nghề và thường mất đi khi họ nghỉ việc","Vì giúp giảm chi phí điện năng","Vì giúp tăng sản lượng ngay lập tức","Vì thay thế được hệ thống KPI"],a:0,e:"Đây chính là hiện thực hóa yêu cầu “Tri thức của tổ chức” tại ISO 9001:2015 điều 7.1.6.",r:"Ch.10 – 10.2"},
+{id:"C10-13",ch:10,lv:"QL",d:2,q:"Kết quả của “Ngân hàng tình huống” cuối quý trở thành đầu vào cho việc gì?",o:["Cải tiến SOP — đúng tinh thần cải tiến liên tục của ISO 9001:2015","Đánh giá thi đua khen thưởng","Tính lương theo sản phẩm","Xây dựng kế hoạch tài chính"],a:0,e:"Tổng hợp tình huống theo dạng lỗi rồi rút ra quy trình phòng ngừa chung.",r:"Ch.10 – 10.2"},
+{id:"C10-14",ch:10,lv:"ALL",d:2,q:"Nguyên tắc nào phải luôn được nhắc lại khi ứng dụng vào mọi bộ phận?",o:["Nhân Mã (con người kiểm chứng và quyết định) và kỷ luật bảo mật (không nạp dữ liệu mật vào tài khoản cá nhân)","Ưu tiên tốc độ hơn độ chính xác","Mọi đầu ra AI đều dùng ngay được","Ai cũng có thể chia sẻ notebook cho bên ngoài"],a:0,e:"Gemini Notebook không thay thế ý kiến pháp lý, kiểm toán hay giám định kỹ thuật.",r:"Ch.10 – 10.1"},
+
+// ================= CHƯƠNG 11 (20 câu) =================
+{id:"C11-01",ch:11,lv:"ALL",d:1,q:"Google có dùng dữ liệu người dùng nạp lên Gemini Notebook để huấn luyện mô hình nền không?",o:["Không — Google tuyên bố không dùng dữ liệu nạp lên để huấn luyện mô hình nền","Có, với mọi tài khoản","Có, chỉ với tài khoản miễn phí","Có, nếu notebook được chia sẻ công khai"],a:0,e:"Đây là điểm mạnh cốt lõi, khác biệt so với nhiều công cụ AI miễn phí khác.",r:"Ch.11 – 11.1"},
+{id:"C11-02",ch:11,lv:"ALL",d:3,q:"Phát biểu nào ĐÚNG về việc “không huấn luyện” và “không lưu trữ”?",o:["Không huấn luyện KHÔNG đồng nghĩa không lưu trữ; nội dung vẫn được xử lý và lưu trong thời gian sử dụng","Không huấn luyện nghĩa là dữ liệu không rời khỏi máy người dùng","Hai khái niệm này là một","Dữ liệu bị xóa ngay sau mỗi câu trả lời"],a:0,e:"Dữ liệu vẫn rời khỏi hạ tầng Công ty — đó là căn cứ để duy trì phân loại mật.",r:"Ch.11 – 11.1"},
+{id:"C11-03",ch:11,lv:"ALL",d:2,q:"Tài liệu Cấp 2 — NỘI BỘ gồm những gì?",o:["SOP tác nghiệp, JD, biểu mẫu, tài liệu đào tạo, biên bản họp thường kỳ","Catalogue sản phẩm đã phát hành","Giá vốn và biên lợi nhuận","Chiến lược M&A"],a:0,e:"Cấp 2 chỉ được nạp trên tài khoản Workspace của Công ty.",r:"Ch.11 – 11.2"},
+{id:"C11-04",ch:11,lv:"ALL",d:2,q:"Tài liệu Cấp 3 — MẬT được nạp với điều kiện nào?",o:["Có phê duyệt bằng văn bản của Trưởng bộ phận, dùng tài khoản Workspace và đã khử thông tin định danh cá nhân","Chỉ cần dùng tài khoản Workspace","Chỉ cần thông báo miệng cho quản lý","Không có điều kiện gì"],a:0,e:"Ví dụ Cấp 3: giá vốn, hợp đồng đang đàm phán, thiết kế chưa ra mắt, dữ liệu khách hàng có thông tin cá nhân.",r:"Ch.11 – 11.2"},
+{id:"C11-05",ch:11,lv:"ALL",d:1,q:"Nội dung nào thuộc Cấp 4 — TUYỆT MẬT, cấm nạp tuyệt đối?",o:["Hồ sơ nhân sự cá nhân (lương, kỷ luật, y tế), mật khẩu hệ thống, bí mật công nghệ lõi, chiến lược M&A","Nội quy lao động đã ban hành","Quy trình nhập – xuất kho","Tài liệu đào tạo hội nhập"],a:0,e:"Không có ngoại lệ, kể cả bản trích một phần.",r:"Ch.11 – 11.2, 11.3"},
+{id:"C11-06",ch:11,lv:"ALL",d:2,q:"Điều cấm số 5 trong mười điều cấm tuyệt đối là:",o:["Không tạo liên kết chia sẻ công khai cho notebook chứa tài liệu Cấp 2 trở lên","Không dùng notebook quá 2 giờ mỗi ngày","Không tạo quá 10 notebook","Không nạp tài liệu tiếng Anh"],a:0,e:"Chia sẻ công khai là rủi ro rò rỉ nghiêm trọng nhất do hành vi người dùng.",r:"Ch.11 – 11.3"},
+{id:"C11-07",ch:11,lv:"ALL",d:2,q:"Về dữ liệu cá nhân của khách hàng, nhân viên hay ứng viên, quy định của SAKOS là:",o:["Không nạp khi chưa khử định danh và chưa có căn cứ hợp pháp theo Luật Bảo vệ dữ liệu cá nhân 2025","Được nạp tự do vì Google không huấn luyện trên dữ liệu","Chỉ cần xóa số điện thoại là đủ","Được nạp nếu có sự đồng ý miệng của người đó"],a:0,e:"Bao gồm họ tên đầy đủ kèm số điện thoại, số căn cước, địa chỉ, thông tin sức khỏe, lương.",r:"Ch.11 – 11.3"},
+{id:"C11-08",ch:11,lv:"ALL",d:2,q:"Việc cài tiện ích trình duyệt hoặc công cụ bên thứ ba can thiệp vào Gemini Notebook:",o:["Phải được Bộ phận CNTT thẩm định trước","Được phép tự do nếu tiện ích miễn phí","Được phép nếu do đồng nghiệp giới thiệu","Bị cấm hoàn toàn trong mọi trường hợp"],a:0,e:"Đây là điều cấm số 10 trong mười điều cấm tuyệt đối.",r:"Ch.11 – 11.3"},
+{id:"C11-09",ch:11,lv:"ALL",d:2,q:"Nhóm rủi ro số 1 với mức độ “Rất cao” trong ma trận bảy nhóm rủi ro là:",o:["Rò rỉ dữ liệu","Sai lệch thông tin","Gián đoạn dịch vụ","Chi phí & hạn mức"],a:0,e:"Biện pháp kiểm soát: phân loại 4 cấp, bắt buộc tài khoản Workspace, rà soát quyền chia sẻ hằng quý.",r:"Ch.11 – 11.4"},
+{id:"C11-10",ch:11,lv:"ALL",d:3,q:"Rủi ro “phụ thuộc quá mức” biểu hiện như thế nào?",o:["Nhân viên ngừng đọc tài liệu gốc và mất dần năng lực chuyên môn nền","Nhân viên dùng AI quá ít giờ mỗi ngày","Hệ thống bị quá tải do nhiều người dùng","Chi phí thuê bao tăng nhanh"],a:0,e:"Biện pháp: duy trì kiểm tra nghiệp vụ không dùng AI; AI là trợ lý, không phải người thay thế.",r:"Ch.11 – 11.4"},
+{id:"C11-11",ch:11,lv:"QL",d:2,q:"Biện pháp kiểm soát rủi ro “gián đoạn dịch vụ” là:",o:["Luôn giữ bản gốc tài liệu trong hệ thống của Công ty, xuất và lưu các đầu ra quan trọng, có kế hoạch dự phòng theo ISO 22301","Mua thêm gói Ultra để tăng độ ổn định","Sao lưu notebook sang tài khoản cá nhân","Chuyển sang dùng công cụ AI khác"],a:0,e:"Nguyên tắc “bản gốc luôn ở nhà”.",r:"Ch.11 – 11.4, 11.5"},
+{id:"C11-12",ch:11,lv:"QL",d:2,q:"Theo yêu cầu ISO 22301 điều 8.2 (Phân tích tác động), SAKOS phải làm gì?",o:["Xác định các quy trình đã phụ thuộc Gemini Notebook và mức chịu đựng gián đoạn tối đa của từng quy trình","Mua bảo hiểm rủi ro công nghệ","Ký hợp đồng SLA với Google","Đào tạo lại toàn bộ nhân sự mỗi tháng"],a:0,e:"Đây là bước đầu của quản trị liên tục kinh doanh với dịch vụ đám mây bên thứ ba.",r:"Ch.11 – 11.5"},
+{id:"C11-13",ch:11,lv:"QL",d:3,q:"Kịch bản diễn tập kinh doanh liên tục mà SAKOS yêu cầu tối thiểu 1 lần/năm là:",o:["“Mất Gemini Notebook trong 5 ngày làm việc”","“Mất điện toàn nhà máy 1 ngày”","“Cháy kho thành phẩm”","“Nhà cung cấp chính ngừng giao hàng”"],a:0,e:"Kết quả diễn tập được báo cáo trong họp xem xét lãnh đạo.",r:"Ch.11 – 11.5"},
+{id:"C11-14",ch:11,lv:"ALL",d:2,q:"Nguyên tắc bất biến về lưu trữ được phát biểu là:",o:["Gemini Notebook là công cụ KHAI THÁC tri thức, KHÔNG phải hệ thống LƯU TRỮ hồ sơ của Công ty","Notebook thay thế hệ thống lưu trữ tài liệu ISO","Chỉ cần lưu tài liệu trên notebook là đủ","Notebook là bản sao lưu chính thức của hồ sơ"],a:0,e:"Mọi hồ sơ bắt buộc lưu theo ISO 9001:2015 điều 7.5 phải nằm ở hệ thống chính thức của Công ty.",r:"Ch.11 – 11.5"},
+{id:"C11-15",ch:11,lv:"ALL",d:2,q:"Khi chat về tài liệu Công ty trong ứng dụng Gemini (thay vì ứng dụng Notebook độc lập), rủi ro là gì?",o:["Hội thoại tuân theo cài đặt hoạt động của ứng dụng Gemini, khác với chính sách trong Gemini Notebook","Không có trích dẫn nguồn","Tốn gấp đôi hạn mức","Không lưu được lịch sử"],a:0,e:"Vì vậy chỉ làm việc với tài liệu Công ty trong ứng dụng Notebook độc lập.",r:"Ch.11 – 11.1; Ch.2 – 2.4"},
+{id:"C11-16",ch:11,lv:"ALL",d:2,q:"Với tài liệu của bên thứ ba đang chịu ràng buộc bảo mật (NDA), quy định là:",o:["Không nạp khi chưa kiểm tra điều khoản cho phép","Được nạp vì Google không huấn luyện trên dữ liệu","Được nạp nếu chỉ dùng nội bộ","Được nạp nếu đã hết hạn hợp đồng"],a:0,e:"Đây là điều cấm số 9, liên quan nhóm rủi ro Sở hữu trí tuệ.",r:"Ch.11 – 11.3, 11.4"},
+{id:"C11-17",ch:11,lv:"ALL",d:1,q:"Theo nguyên tắc Nhân Mã, ai sở hữu kết quả và chịu trách nhiệm?",o:["Người sử dụng AI","Nhà cung cấp công cụ AI","Bộ phận CNTT","Ban Chuyển đổi số"],a:0,e:"Gắn với giá trị A – Accountability trong hệ giá trị S·A·K·O·S⁺.",r:"Ch.11 – 11.6"},
+{id:"C11-18",ch:11,lv:"ALL",d:2,q:"Khi xảy ra sai sót do sử dụng AI, trình tự xử lý đúng là:",o:["Thừa nhận ngay → tìm nguyên nhân gốc → đề xuất biện pháp phòng ngừa tái diễn","Im lặng và tự sửa để giữ uy tín","Đổ lỗi cho công cụ AI","Chờ cấp trên phát hiện rồi giải trình"],a:0,e:"Đây là văn hóa trách nhiệm được xây từ trên xuống.",r:"Ch.11 – 11.6"},
+{id:"C11-19",ch:11,lv:"ALL",d:2,q:"Câu nói nào là KHÔNG chấp nhận được theo quy định của SAKOS?",o:["“AI đưa ra kết quả như vậy nên tôi không chịu trách nhiệm”","“Tôi đã kiểm chứng trích dẫn trước khi trình ký”","“Nội dung này cần Bộ phận Pháp chế xem xét thêm”","“Tôi chưa đủ căn cứ nên chưa kết luận”"],a:0,e:"Không cá nhân nào được viện dẫn AI để miễn trừ trách nhiệm cá nhân.",r:"Ch.11 – 11.6"},
+{id:"C11-20",ch:11,lv:"QL",d:3,q:"Vì sao Chương 11 là phần bắt buộc đạt trong bài kiểm tra cuối khóa?",o:["Vì một sai sót bảo mật có thể gây thiệt hại lớn hơn toàn bộ lợi ích công cụ mang lại trong nhiều năm","Vì đây là chương dài nhất","Vì ISO yêu cầu kiểm tra bảo mật hằng năm","Vì Google yêu cầu người dùng cam kết"],a:0,e:"Không có ngoại lệ cho bất kỳ cấp bậc nào.",r:"Ch.11 – mở đầu; Ch.13 – 13.1"},
+
+// ================= CHƯƠNG 12 (8 câu) =================
+{id:"C12-01",ch:12,lv:"ALL",d:2,q:"Mức năng lực N3 — “Người dùng thành thạo” yêu cầu gì?",o:["Áp dụng RTCRF⁺, chọn tập nguồn tối thiểu, tạo đủ 9 loại đầu ra Studio, xuất PPTX/Sheets, tuân thủ chuẩn đặt tên và phân loại mật","Biết mở notebook được chia sẻ và nghe podcast","Thiết kế kiến trúc tri thức ba tầng toàn Công ty","Tự tạo notebook và đặt câu hỏi cơ bản"],a:0,e:"N3 là mức bắt buộc với Nhóm B (khối văn phòng, kỹ thuật).",r:"Ch.12 – 12.1"},
+{id:"C12-02",ch:12,lv:"ALL",d:2,q:"Mức năng lực tối thiểu bắt buộc với Nhóm C (tổ trưởng, nhân sự trực tiếp) là:",o:["N2","N1","N3","N4"],a:0,e:"N2 — tự tạo notebook, nạp nguồn, đặt câu hỏi và biết bấm kiểm tra trích dẫn.",r:"Ch.12 – 12.1; Mở đầu mục 2"},
+{id:"C12-03",ch:12,lv:"QL",d:2,q:"Mức năng lực bắt buộc với Nhóm A (Ban lãnh đạo, Giám đốc khối, Trưởng bộ phận) là:",o:["N4 — Người kiến tạo","N2 — Người dùng cơ bản","N3 — Người dùng thành thạo","N5 — Người dẫn dắt"],a:0,e:"N4: thiết kế notebook chuẩn cho bộ phận, xây dây chuyền học liệu, thẩm định đầu ra, hướng dẫn lại đồng nghiệp.",r:"Ch.12 – 12.1"},
+{id:"C12-04",ch:12,lv:"QL",d:2,q:"Trong kế hoạch 90 ngày, Giai đoạn 1 (Tuần 1–2) tập trung vào việc gì?",o:["Bộ phận CNTT xác nhận phiên bản Workspace, hạn mức thực tế, quyền truy cập; ban hành bảng phân loại dữ liệu và chuẩn đặt tên","Đào tạo toàn thể CBCNV","Đo lường KPI hiệu quả","Sinh hoạt Câu lạc bộ AI"],a:0,e:"Nền tảng kỹ thuật và quy chế phải có trước khi đào tạo diện rộng.",r:"Ch.12 – 12.2"},
+{id:"C12-05",ch:12,lv:"QL",d:2,q:"Giai đoạn 2 (Tuần 3–5) của kế hoạch triển khai là:",o:["Đào tạo 01–02 hạt nhân AI cho mỗi bộ phận đạt mức N4 và mỗi hạt nhân dựng 01 notebook mẫu","Phổ cập cho toàn thể CBCNV","Mua gói Ultra cho toàn Công ty","Diễn tập kịch bản gián đoạn dịch vụ"],a:0,e:"Kết quả: 11 notebook mẫu và đội ngũ giảng viên nội bộ.",r:"Ch.12 – 12.2"},
+{id:"C12-06",ch:12,lv:"ALL",d:2,q:"Hai chỉ số KPI có ngưỡng TUYỆT ĐỐI trong bộ KPI là:",o:["Số sự cố bảo mật liên quan AI = 0 và tỷ lệ đầu ra được kiểm chứng trích dẫn trước khi dùng = 100%","Tỷ lệ CBCNV đạt N3 và số notebook đang hoạt động","Thời gian tra cứu giảm 60% và thời gian soạn học liệu giảm 50%","Số lượt chat mỗi ngày và số Audio Overview"],a:0,e:"Đây là hai chỉ số không cho phép sai lệch dù chỉ một trường hợp.",r:"Ch.12 – 12.3"},
+{id:"C12-07",ch:12,lv:"QL",d:2,q:"Trách nhiệm chính của Trưởng bộ phận trong triển khai là:",o:["Phân loại mật tài liệu bộ phận, phê duyệt nội dung được nạp, thẩm định học liệu, bảo đảm nhân sự đạt mức năng lực yêu cầu","Quản trị tài khoản và hạn mức","Biên soạn và cập nhật giáo trình","Xử lý sự cố kỹ thuật"],a:0,e:"Quản trị tài khoản thuộc Bộ phận CNTT; biên soạn giáo trình thuộc Ban CĐS & Ứng dụng AI.",r:"Ch.12 – 12.4"},
+{id:"C12-08",ch:12,lv:"ALL",d:2,q:"Trách nhiệm của MỖI CBCNV được quy định là:",o:["Tuân thủ 10 điều cấm, áp dụng quy tắc “Ba lần bấm”, chịu trách nhiệm cá nhân với mọi đầu ra mình sử dụng","Báo cáo số lượt sử dụng AI hằng ngày","Tự mua gói trả phí để phục vụ công việc","Chia sẻ notebook cho càng nhiều người càng tốt"],a:0,e:"Trách nhiệm cá nhân là nền tảng của nguyên tắc Nhân Mã.",r:"Ch.12 – 12.4; Ch.11 – 11.6"},
+];
+
+const QBANK=[].concat(QB1,QB2,QB3,QB4);
+
+
+/* ============================================================
+   CẤU HÌNH
+   ============================================================ */
+const CH_NAME={1:"Bản chất & định vị",2:"Tiến hóa & trạng thái sản phẩm",3:"Điều kiện, gói cước & hạn mức",4:"Giao diện & thao tác nền tảng",5:"Quản trị nguồn",6:"Trò chuyện, trích dẫn & kiểm chứng",7:"Xưởng Studio – 9 sản phẩm",8:"Kỹ thuật đặt câu lệnh (Prompt)",9:"Token, dung lượng & tri thức",10:"Ứng dụng theo bộ phận",11:"Rủi ro, bảo mật & tuân thủ",12:"Lộ trình năng lực & triển khai"};
+const DEF_CFG={
+ QL:{n:60,min:60,pass:80,matrix:{1:5,2:4,3:6,4:4,5:6,6:5,7:7,8:5,9:4,10:5,11:7,12:2}},
+ NV:{n:45,min:45,pass:70,matrix:{1:4,2:2,3:4,4:5,5:5,6:4,7:6,8:4,9:2,10:3,11:6,12:0}},
+ critCh:11, critPct:85,           // điều kiện liệt: Chương 11 phải đúng ≥ 85%
+ maxViol:3,                        // số lần vi phạm tối đa trước khi đình chỉ & tự nộp
+ forceFs:true,                     // bắt buộc toàn màn hình
+ lockBack:true,                    // không cho quay lại câu trước
+ showReview:true,                  // cho xem lại đáp án sau khi nộp
+ cooldown:5,                       // phút chờ tối thiểu giữa 2 lần thi
+ adminPin:"sakos2026"
+};
+const K_USER="nbl_user",K_LOG="nbl_log",K_CFG="nbl_cfg",K_STUDY="nbl_study";
+let CFG=Object.assign({},DEF_CFG,JSON.parse(localStorage.getItem(K_CFG)||"{}"));
+let me=null,cur="home",EX=null,tick=null,practice=null;
+
+/* ============================================================
+   TIỆN ÍCH
+   ============================================================ */
+const $=id=>document.getElementById(id);
+const esc=s=>String(s==null?"":s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const pad=n=>String(n).padStart(2,"0");
+const now=()=>new Date();
+function fmtDT(t){const d=new Date(t);return pad(d.getDate())+"/"+pad(d.getMonth()+1)+"/"+d.getFullYear()+" "+pad(d.getHours())+":"+pad(d.getMinutes())}
+function mmss(s){return pad(Math.floor(s/60))+":"+pad(s%60)}
+function shuffle(a,rnd){a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(rnd()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a}
+function mkRnd(seed){let s=seed>>>0;return()=>{s=(s*1664525+1013904223)>>>0;return s/4294967296}}
+function hash(str){let h=5381;for(let i=0;i<str.length;i++)h=((h*33)^str.charCodeAt(i))>>>0;return h.toString(36).toUpperCase().padStart(7,"0").slice(-7)}
+function saveCfg(){localStorage.setItem(K_CFG,JSON.stringify(CFG))}
+function getLog(){try{return JSON.parse(localStorage.getItem(K_LOG)||"[]")}catch(e){return[]}}
+function putLog(a){localStorage.setItem(K_LOG,JSON.stringify(a))}
+function modal(html){$("modalHost").innerHTML='<div class="modal-bg" id="mbg"><div class="modal">'+html+'</div></div>'}
+function closeModal(){$("modalHost").innerHTML=""}
+
+/* ============================================================
+   ĐĂNG NHẬP
+   ============================================================ */
+function doLogin(){
+ const n=$("fName").value.trim(),d=$("fDept").value,l=$("fLevel").value;
+ if(!n||!d||!l){$("loginErr").textContent="Vui lòng nhập đủ Họ tên, Bộ phận và Cấp bậc dự thi.";return}
+ me={name:n,code:$("fCode").value.trim(),dept:d,lv:l};
+ localStorage.setItem(K_USER,JSON.stringify(me));
+ startApp();
+}
+function logout(){if(EX&&!EX.done){if(!confirm("Bạn đang trong giờ thi. Thoát sẽ HỦY bài thi hiện tại. Tiếp tục?"))return;disarm();EX=null}
+ localStorage.removeItem(K_USER);location.reload()}
+function startApp(){
+ $("login").classList.add("hidden");$("app").classList.remove("hidden");
+ $("whoName").textContent=me.name+(me.code?" · "+me.code:"");
+ $("whoRole").textContent=me.lv==="QL"?"CẤP QUẢN LÝ":"CẤP NHÂN VIÊN";
+ $("whoAv").textContent=me.name.trim().split(/\s+/).pop().charAt(0).toUpperCase();
+ $("fBank").textContent=QBANK.length;
+ buildNav();go("home");
+}
+function buildNav(){
+ const items=[["home","🏠","Trang chủ"],["study","📚","Ôn bài theo chương"],["drill","🎯","Luyện tập nhanh"],["rules","📋","Quy chế thi"],["exam","📝","VÀO PHÒNG THI"],["hist","📊","Kết quả & lịch sử"],["admin","⚙️","Quản trị (Cán bộ đào tạo)"]];
+ $("nav").innerHTML='<div class="nav-sep">Chuẩn bị</div>'+
+  items.slice(0,4).map(i=>navItem(i)).join("")+
+  '<div class="nav-sep">Kiểm tra</div>'+items.slice(4,6).map(i=>navItem(i)).join("")+
+  '<div class="nav-sep">Hệ thống</div>'+navItem(items[6]);
+}
+const navItem=i=>'<div class="nav-item" id="nav-'+i[0]+'" onclick="go(\''+i[0]+'\')"><span class="ic">'+i[1]+'</span>'+i[2]+'</div>';
+function go(k,arg){
+ if(EX&&!EX.done&&k!=="exam"){if(!confirm("Bạn đang trong giờ thi. Rời trang sẽ HỦY bài thi. Tiếp tục?"))return;disarm();EX=null}
+ cur=k;document.querySelectorAll(".nav-item").forEach(e=>e.classList.remove("active"));
+ const n=$("nav-"+k);if(n)n.classList.add("active");
+ document.querySelector("nav.side").classList.remove("open");
+ const R={home:viewHome,study:viewStudy,drill:viewDrill,rules:viewRules,exam:viewExamGate,hist:viewHist,admin:viewAdmin,result:()=>viewResult(arg)};
+ $("view").innerHTML=(R[k]||viewHome)();window.scrollTo(0,0);
+ if(k==="study")renderStudy();
+}
+
+/* ============================================================
+   TRANG CHỦ
+   ============================================================ */
+function viewHome(){
+ const c=CFG[me.lv],log=getLog().filter(x=>x.lv===me.lv),best=log.length?Math.max.apply(null,log.map(x=>x.pct)):0;
+ const passed=log.filter(x=>x.pass).length;
+ return '<div class="page-title">Xin chào, '+esc(me.name)+'</div>'+
+ '<div class="page-sub">'+esc(me.dept)+' · Đề dành cho '+(me.lv==="QL"?"CẤP QUẢN LÝ":"CẤP NHÂN VIÊN")+'</div>'+
+ '<div class="stat-row">'+
+  '<div class="stat blue"><div class="num">'+QBANK.length+'</div><div class="lbl">Câu trong ngân hàng</div></div>'+
+  '<div class="stat"><div class="num">'+c.n+'</div><div class="lbl">Số câu mỗi đề</div></div>'+
+  '<div class="stat gold"><div class="num">'+c.min+"'"+'</div><div class="lbl">Thời gian làm bài</div></div>'+
+  '<div class="stat '+(best>=c.pass?"green":"red")+'"><div class="num">'+(log.length?best+"%":"—")+'</div><div class="lbl">Điểm cao nhất ('+log.length+' lần thi)</div></div>'+
+ '</div>'+
+ '<div class="card"><h3 class="sec" style="margin-top:0">Lộ trình khuyến nghị</h3>'+
+  '<div class="grid2">'+
+   card("📚","Bước 1 — Ôn bài theo chương","Duyệt toàn bộ "+QBANK.length+" câu kèm đáp án, giải thích và tham chiếu chương trong giáo trình.","study","Mở phần ôn bài")+
+   card("🎯","Bước 2 — Luyện tập nhanh","Làm thử 15 câu ngẫu nhiên, chấm ngay từng câu, không tính vào kết quả chính thức.","drill","Bắt đầu luyện tập")+
+   card("📋","Bước 3 — Đọc quy chế thi","Nắm rõ quy định giám sát, điều kiện liệt và cách tính điểm trước khi vào phòng thi.","rules","Xem quy chế")+
+   card("📝","Bước 4 — Vào phòng thi","Đề ngẫu nhiên theo ma trận chương, có đồng hồ và giám sát chống gian lận.","exam","Vào phòng thi")+
+  '</div></div>'+
+ '<div class="info"><b>Điều kiện đạt:</b> Tổng điểm ≥ <b>'+c.pass+'%</b> VÀ phần <b>Chương 11 – Rủi ro, bảo mật &amp; tuân thủ</b> phải đúng tối thiểu <b>'+CFG.critPct+'%</b> (điều kiện liệt). Không đạt điều kiện liệt thì kết quả là KHÔNG ĐẠT dù tổng điểm cao.</div>'+
+ (log.length?'':'<div class="note">Bạn chưa có lần thi nào. Hãy ôn bài trước khi vào phòng thi — mỗi lần thi hệ thống sẽ tạo một đề ngẫu nhiên khác nhau.</div>');
+}
+const card=(ic,t,d,k,btn)=>'<div style="border:1px solid var(--line);border-radius:12px;padding:16px"><div style="font-size:26px">'+ic+'</div><div style="font-weight:800;color:var(--navy);margin:6px 0 4px">'+t+'</div><div style="font-size:13px;color:var(--gray);min-height:44px">'+d+'</div><button class="btn btn-sm" style="margin-top:10px" onclick="go(\''+k+'\')">'+btn+'</button></div>';
+
+/* ============================================================
+   ÔN BÀI THEO CHƯƠNG
+   ============================================================ */
+function viewStudy(){
+ let opts='<option value="0">Tất cả chương ('+QBANK.length+' câu)</option>';
+ Object.keys(CH_NAME).forEach(c=>{const n=QBANK.filter(q=>q.ch==c).length;opts+='<option value="'+c+'">Chương '+c+' — '+CH_NAME[c]+' ('+n+' câu)</option>'});
+ return '<div class="page-title">Ôn bài theo chương</div><div class="page-sub">Toàn bộ ngân hàng câu hỏi kèm đáp án, giải thích và tham chiếu tới giáo trình SAKOS-AI-NBL-001.</div>'+
+ '<div class="toolbar"><input id="sQ" placeholder="🔍 Tìm theo từ khóa trong câu hỏi..." oninput="renderStudy()">'+
+ '<select id="sCh" onchange="renderStudy()">'+opts+'</select>'+
+ '<select id="sMode" onchange="renderStudy()"><option value="show">Hiện đáp án</option><option value="hide">Ẩn đáp án (tự kiểm tra)</option></select></div>'+
+ '<div id="studyList"></div>';
+}
+function renderStudy(){
+ const kw=($("sQ").value||"").toLowerCase().trim(),ch=+$("sCh").value,mode=$("sMode").value;
+ let list=QBANK.filter(q=>(!ch||q.ch===ch)&&(!kw||(q.q+" "+q.o.join(" ")+" "+q.e).toLowerCase().includes(kw)));
+ if(!list.length){$("studyList").innerHTML='<div class="card" style="text-align:center;color:var(--gray)">Không tìm thấy câu hỏi phù hợp.</div>';return}
+ $("studyList").innerHTML='<div class="page-sub">Đang hiển thị <b>'+list.length+'</b> câu.</div>'+list.map((q,i)=>{
+  const opts=q.o.map((o,j)=>'<div class="opt '+(mode==="show"&&j===q.a?"correct":"")+'"><span class="k">'+"ABCD"[j]+'</span>'+esc(o)+'</div>').join("");
+  return '<div class="qbox"><div class="qhead"><span class="pill n">Chương '+q.ch+' · '+esc(CH_NAME[q.ch])+'</span>'+
+   '<span class="pill '+(q.d===1?"g":q.d===2?"y":"r")+'">Độ khó '+q.d+'</span>'+
+   (q.lv==="QL"?'<span class="pill b">Dành cho Quản lý</span>':'')+'<span style="font-size:11.5px;color:var(--gray)">'+q.id+'</span></div>'+
+   '<div class="qtext">'+(i+1)+'. '+esc(q.q)+'</div>'+opts+
+   '<div class="exp'+(mode==="show"?"":" hidden")+'" id="exp'+i+'"><b>Giải thích:</b> '+esc(q.e)+' <span style="color:var(--gray)">('+esc(q.r)+')</span></div>'+
+   (mode==="show"?'':'<button class="btn btn-sm btn-ghost" id="rv'+i+'" onclick="revealS('+i+','+q.a+')">Xem đáp án</button>')+
+   '</div>';
+ }).join("");
+}
+
+function revealS(i,a){
+ const box=document.querySelectorAll("#studyList .qbox")[i];
+ if(box)box.querySelectorAll(".opt")[a].classList.add("correct");
+ const e=$("exp"+i);if(e)e.classList.remove("hidden");
+ const b=$("rv"+i);if(b)b.remove();
+}
+
+/* ============================================================
+   LUYỆN TẬP NHANH (không tính điểm)
+   ============================================================ */
+function viewDrill(){
+ if(!practice)return '<div class="page-title">Luyện tập nhanh</div><div class="page-sub">15 câu ngẫu nhiên, chấm ngay từng câu, KHÔNG tính vào kết quả chính thức và không giới hạn thời gian.</div>'+
+  '<div class="card"><div class="info">Chế độ này giúp bạn làm quen dạng câu hỏi. Bạn có thể làm lại bao nhiêu lần tùy ý.</div>'+
+  '<div class="toolbar"><select id="dCh"><option value="0">Tất cả chương</option>'+Object.keys(CH_NAME).map(c=>'<option value="'+c+'">Chương '+c+' — '+CH_NAME[c]+'</option>').join("")+'</select>'+
+  '<select id="dN"><option value="10">10 câu</option><option value="15" selected>15 câu</option><option value="25">25 câu</option></select>'+
+  '<button class="btn btn-sm btn-green" onclick="startDrill()">Bắt đầu luyện tập</button></div></div>';
+ return '<div class="page-title">Luyện tập nhanh</div><div class="page-sub">Chấm ngay từng câu · không tính điểm chính thức</div>'+
+  '<div class="card"><b>Đã trả lời đúng: <span style="color:var(--green)">'+practice.right+'</span> / '+practice.done+'</b> &nbsp; <button class="btn btn-sm btn-ghost" onclick="practice=null;go(\'drill\')">Kết thúc &amp; làm bộ mới</button></div>'+
+  practice.qs.map((q,i)=>drillQ(q,i)).join("");
+}
+function startDrill(){
+ const ch=+$("dCh").value,n=+$("dN").value,rnd=mkRnd(Date.now()&0xffffffff);
+ let pool=QBANK.filter(q=>(!ch||q.ch===ch)&&(q.lv==="ALL"||q.lv===me.lv));
+ practice={qs:shuffle(pool,rnd).slice(0,n).map(q=>({q:q,ans:null})),done:0,right:0};
+ go("drill");
+}
+function drillQ(item,i){
+ const q=item.q;
+ return '<div class="qbox" id="dq'+i+'"><div class="qhead"><span class="pill n">Chương '+q.ch+'</span><span style="font-size:11.5px;color:var(--gray)">'+q.id+'</span></div>'+
+ '<div class="qtext">'+(i+1)+'. '+esc(q.q)+'</div>'+
+ q.o.map((o,j)=>'<div class="opt'+(item.ans===null?"":(j===q.a?" correct":(j===item.ans?" wrong":"")))+'" '+(item.ans===null?'onclick="ansDrill('+i+','+j+')"':'')+'><span class="k">'+"ABCD"[j]+'</span>'+esc(o)+'</div>').join("")+
+ (item.ans===null?'':'<div class="exp"><b>'+(item.ans===q.a?"✔ Chính xác. ":"✘ Chưa đúng. ")+'</b>'+esc(q.e)+' <span style="color:var(--gray)">('+esc(q.r)+')</span></div>')+'</div>';
+}
+function ansDrill(i,j){
+ const it=practice.qs[i];if(it.ans!==null)return;
+ it.ans=j;practice.done++;if(j===it.q.a)practice.right++;
+ $("dq"+i).outerHTML=drillQ(it,i);
+ document.querySelector(".card b").innerHTML='Đã trả lời đúng: <span style="color:var(--green)">'+practice.right+'</span> / '+practice.done;
+}
+
+/* ============================================================
+   QUY CHẾ THI
+   ============================================================ */
+function viewRules(){
+ const c=CFG[me.lv];
+ return '<div class="page-title">Quy chế kỳ kiểm tra</div><div class="page-sub">Bắt buộc đọc trước khi vào phòng thi</div>'+
+ '<div class="card"><h3 class="sec" style="margin-top:0">1. Cấu trúc đề thi của bạn</h3>'+
+ '<table class="data"><tr><th>Hạng mục</th><th>Quy định</th></tr>'+
+ '<tr><td>Cấp bậc dự thi</td><td><b>'+(me.lv==="QL"?"CẤP QUẢN LÝ":"CẤP NHÂN VIÊN")+'</b></td></tr>'+
+ '<tr><td>Số câu</td><td><b>'+c.n+' câu</b> trắc nghiệm 4 phương án, rút ngẫu nhiên từ ngân hàng '+QBANK.length+' câu</td></tr>'+
+ '<tr><td>Thời gian</td><td><b>'+c.min+' phút</b> (trung bình '+Math.round(c.min*60/c.n)+' giây/câu) — hết giờ hệ thống TỰ ĐỘNG nộp bài</td></tr>'+
+ '<tr><td>Điểm đạt</td><td>Tổng điểm ≥ <b>'+c.pass+'%</b></td></tr>'+
+ '<tr><td>Điều kiện liệt</td><td>Phần <b>Chương 11 – Rủi ro, bảo mật &amp; tuân thủ</b> phải đúng ≥ <b>'+CFG.critPct+'%</b>. Không đạt → KHÔNG ĐẠT toàn bài.</td></tr>'+
+ '<tr><td>Xếp loại</td><td>≥ 90 Xuất sắc · 80–89 Khá · '+c.pass+'–79 Đạt · &lt; '+c.pass+' Không đạt</td></tr>'+
+ '<tr><td>Thi lại</td><td>Được phép, đề mới hoàn toàn. Phải chờ tối thiểu <b>'+CFG.cooldown+' phút</b> giữa hai lần thi. Mọi lần thi đều được ghi nhật ký.</td></tr>'+
+ '</table></div>'+
+ '<div class="card"><h3 class="sec" style="margin-top:0">2. Ma trận đề theo chương</h3>'+
+ '<table class="data"><tr><th>Chương</th><th>Nội dung</th><th style="text-align:center">Số câu</th></tr>'+
+ Object.keys(CH_NAME).map(ch=>{const n=c.matrix[ch]||0;return n?'<tr><td>Chương '+ch+'</td><td>'+CH_NAME[ch]+'</td><td style="text-align:center"><b>'+n+'</b></td></tr>':''}).join("")+
+ '<tr><td colspan="2"><b>TỔNG CỘNG</b></td><td style="text-align:center"><b>'+c.n+'</b></td></tr></table></div>'+
+ '<div class="card"><h3 class="sec" style="margin-top:0">3. Quy định giám sát &amp; chống gian lận</h3>'+
+ '<div class="warn"><b>Hệ thống giám sát tự động trong suốt giờ thi:</b><ul style="margin:8px 0 0 18px">'+
+ '<li>Bài thi chạy ở chế độ <b>toàn màn hình</b>. Thoát toàn màn hình bị tính là một lần vi phạm.</li>'+
+ '<li><b>Rời khỏi cửa sổ thi</b> (chuyển tab, mở ứng dụng khác, thu nhỏ cửa sổ) bị ghi nhận và tính vi phạm.</li>'+
+ '<li>Vô hiệu hóa <b>sao chép, cắt, dán, chuột phải, bôi đen văn bản</b> và các phím tắt in/lưu trang.</li>'+
+ '<li>Mỗi thí sinh nhận <b>một mã đề ngẫu nhiên riêng</b>; thứ tự câu và thứ tự phương án đều được xáo trộn.</li>'+
+ '<li>Đề hiển thị <b>từng câu một</b> và <b>không cho quay lại</b> câu đã trả lời — hạn chế chụp ảnh toàn đề.</li>'+
+ '<li>Đáp án đúng <b>không hiển thị</b> trong lúc làm bài.</li>'+
+ '<li>Toàn bộ sự kiện bất thường được ghi <b>nhật ký giám sát</b> và in kèm phiếu kết quả.</li></ul></div>'+
+ '<div class="warn" style="background:#FFE4E6"><b>Chế tài:</b> Vi phạm lần 1 và 2 sẽ nhận cảnh báo. <b>Đến lần thứ '+CFG.maxViol+', hệ thống tự động NỘP BÀI và ghi nhận "ĐÌNH CHỈ DO VI PHẠM QUY CHẾ"</b> vào phiếu kết quả.</div>'+
+ '<div class="info"><b>Cam kết liêm chính:</b> Thí sinh tự làm bài, không sử dụng tài liệu, không nhờ người khác làm hộ, không chia sẻ nội dung đề thi ra ngoài. Kết quả gian lận sẽ bị hủy và xử lý theo quy chế nhân sự của Công ty.</div></div>'+
+ '<div class="card"><h3 class="sec" style="margin-top:0">4. Chuẩn bị trước khi bấm nút vào thi</h3>'+
+ '<ul style="margin-left:18px;font-size:14px"><li>Đóng toàn bộ ứng dụng và tab không liên quan.</li><li>Bảo đảm máy đủ pin hoặc đang cắm nguồn.</li><li>Chọn nơi yên tĩnh, đủ '+c.min+' phút không bị gián đoạn.</li><li>Không tắt trình duyệt giữa chừng — bài thi sẽ bị hủy.</li></ul>'+
+ '<button class="btn" style="margin-top:14px;max-width:300px" onclick="go(\'exam\')">Tôi đã sẵn sàng — Vào phòng thi →</button></div>';
+}
+
+/* ============================================================
+   PHÒNG THI — CỔNG VÀO
+   ============================================================ */
+function viewExamGate(){
+ if(EX&&!EX.done)return runnerHTML();
+ const c=CFG[me.lv],log=getLog().filter(x=>x.name===me.name&&x.lv===me.lv);
+ const last=log.length?log[log.length-1]:null;
+ let waitMsg="";
+ if(last){const mins=(Date.now()-last.at)/60000;if(mins<CFG.cooldown)waitMsg='<div class="warn">Bạn vừa hoàn thành một bài thi. Vui lòng chờ thêm <b>'+Math.ceil(CFG.cooldown-mins)+' phút</b> trước khi thi lại.</div>'}
+ return '<div class="page-title">Phòng thi</div><div class="page-sub">'+esc(me.name)+' · '+esc(me.dept)+' · Đề '+(me.lv==="QL"?"CẤP QUẢN LÝ ("+c.n+" câu / "+c.min+" phút)":"CẤP NHÂN VIÊN ("+c.n+" câu / "+c.min+" phút)")+'</div>'+
+ waitMsg+
+ '<div class="card"><h3 class="sec" style="margin-top:0">Cam kết trước khi làm bài</h3>'+
+ '<div class="info">Tôi xin cam kết:<br>① Tự làm bài, không sử dụng tài liệu, thiết bị hỗ trợ hay nhờ người khác làm hộ.<br>② Không chụp ảnh, sao chép hoặc chia sẻ nội dung đề thi ra ngoài.<br>③ Không rời khỏi cửa sổ thi trong suốt thời gian làm bài.<br>④ Chấp nhận kết quả và chế tài của hệ thống giám sát nếu vi phạm.</div>'+
+ '<label style="display:flex;gap:10px;align-items:flex-start;font-size:14.5px;margin:14px 0"><input type="checkbox" id="agree" style="width:20px;height:20px;margin-top:2px"><span>Tôi đã đọc <b>Quy chế thi</b> và <b>cam kết liêm chính</b> nêu trên.</span></label>'+
+ '<button class="btn btn-red" style="max-width:340px" onclick="beginExam()">🔒 BẮT ĐẦU LÀM BÀI</button>'+
+ '<div class="err" id="exErr"></div></div>'+
+ (log.length?'<div class="card"><h3 class="sec" style="margin-top:0">Các lần thi trước của bạn</h3>'+histTable(log)+'</div>':'');
+}
+
+/* ============================================================
+   SINH ĐỀ
+   ============================================================ */
+function buildPaper(lv,seed){
+ const c=CFG[lv],rnd=mkRnd(seed);let picked=[];
+ Object.keys(c.matrix).forEach(ch=>{
+  const need=c.matrix[ch];if(!need)return;
+  let pool=QBANK.filter(q=>q.ch==ch&&(q.lv==="ALL"||q.lv===lv));
+  if(pool.length<need)pool=QBANK.filter(q=>q.ch==ch);
+  picked=picked.concat(shuffle(pool,rnd).slice(0,need));
+ });
+ picked=shuffle(picked,rnd);
+ return picked.map(q=>{
+  const order=shuffle([0,1,2,3],rnd);
+  return {id:q.id,ch:q.ch,q:q.q,e:q.e,r:q.r,o:order.map(i=>q.o[i]),a:order.indexOf(q.a),ans:null};
+ });
+}
+
+/* ============================================================
+   BẮT ĐẦU THI
+   ============================================================ */
+function beginExam(){
+ if(!$("agree").checked){$("exErr").textContent="Bạn phải xác nhận cam kết liêm chính trước khi làm bài.";return}
+ const log=getLog().filter(x=>x.name===me.name&&x.lv===me.lv);
+ if(log.length){const mins=(Date.now()-log[log.length-1].at)/60000;if(mins<CFG.cooldown){$("exErr").textContent="Chưa hết thời gian chờ giữa hai lần thi.";return}}
+ const c=CFG[me.lv],seed=(Date.now()^Math.floor(Math.random()*1e9))>>>0;
+ EX={seed:seed,code:"NBL-"+(me.lv)+"-"+hash(String(seed)).slice(0,5),lv:me.lv,qs:buildPaper(me.lv,seed),i:0,
+     start:Date.now(),left:c.min*60,viol:0,vlog:[],done:false,forced:false};
+ arm();
+ $("view").innerHTML=runnerHTML();
+ if(CFG.forceFs)enterFs();
+ tick=setInterval(onTick,1000);
+}
+function enterFs(){const el=document.documentElement;if(el.requestFullscreen)el.requestFullscreen().catch(()=>{})}
+function exitFs(){if(document.fullscreenElement&&document.exitFullscreen)document.exitFullscreen().catch(()=>{})}
+function onTick(){
+ if(!EX||EX.done)return;
+ EX.left--;
+ const cl=$("clock");if(cl){cl.textContent=mmss(Math.max(0,EX.left));cl.classList.toggle("danger",EX.left<=60)}
+ if(EX.left<=0)submitExam(true,"Hết giờ làm bài");
+}
+
+/* ---------- GIÁM SÁT CHỐNG GIAN LẬN ---------- */
+let lastViol=0;
+const stopEv=e=>{e.preventDefault();return false};
+function onVis(){if(document.hidden)violate("Rời khỏi cửa sổ thi (chuyển tab / thu nhỏ)")}
+function onBlur(){violate("Mất tiêu điểm cửa sổ thi")}
+function onFsChange(){if(CFG.forceFs&&!document.fullscreenElement&&EX&&!EX.done)violate("Thoát chế độ toàn màn hình")}
+function onKeyEx(e){
+ const k=(e.key||"").toLowerCase();
+ if(e.key==="PrintScreen"){violate("Sử dụng phím chụp màn hình");return}
+ if((e.ctrlKey||e.metaKey)&&["c","v","x","p","s","u","a"].includes(k)){e.preventDefault();violate("Dùng phím tắt bị cấm (Ctrl/Cmd+"+k.toUpperCase()+")");return false}
+ if(e.key==="F12"||((e.ctrlKey||e.metaKey)&&e.shiftKey&&["i","j","c"].includes(k))){e.preventDefault();violate("Mở công cụ nhà phát triển");return false}
+}
+function arm(){
+ document.body.classList.add("exam-mode");
+ document.addEventListener("visibilitychange",onVis);
+ window.addEventListener("blur",onBlur);
+ document.addEventListener("fullscreenchange",onFsChange);
+ document.addEventListener("keydown",onKeyEx,true);
+ ["contextmenu","copy","cut","paste","selectstart","dragstart"].forEach(ev=>document.addEventListener(ev,stopEv));
+ window.addEventListener("beforeunload",beforeLeave);
+}
+function disarm(){
+ document.body.classList.remove("exam-mode");
+ document.removeEventListener("visibilitychange",onVis);
+ window.removeEventListener("blur",onBlur);
+ document.removeEventListener("fullscreenchange",onFsChange);
+ document.removeEventListener("keydown",onKeyEx,true);
+ ["contextmenu","copy","cut","paste","selectstart","dragstart"].forEach(ev=>document.removeEventListener(ev,stopEv));
+ window.removeEventListener("beforeunload",beforeLeave);
+ if(tick){clearInterval(tick);tick=null}
+ exitFs();
+}
+function beforeLeave(e){if(EX&&!EX.done){e.preventDefault();e.returnValue=""}}
+function violate(reason){
+ if(!EX||EX.done)return;
+ const t=Date.now();if(t-lastViol<1500)return;lastViol=t;
+ EX.viol++;EX.vlog.push({t:t,r:reason,n:EX.viol});
+ const vc=$("vcount");if(vc)vc.textContent="⚠ Vi phạm: "+EX.viol+"/"+CFG.maxViol;
+ if(EX.viol>=CFG.maxViol){submitExam(true,"ĐÌNH CHỈ DO VI PHẠM QUY CHẾ: "+reason);return}
+ modal('<h3>⚠ CẢNH BÁO VI PHẠM QUY CHẾ (lần '+EX.viol+'/'+CFG.maxViol+')</h3>'+
+  '<p style="font-size:14.5px;margin-bottom:10px">Hệ thống ghi nhận: <b>'+esc(reason)+'</b> lúc '+fmtDT(t)+'.</p>'+
+  '<div class="warn">Sự kiện này đã được ghi vào nhật ký giám sát và sẽ in kèm phiếu kết quả. Nếu vi phạm đủ <b>'+CFG.maxViol+'</b> lần, bài thi sẽ bị <b>đình chỉ và tự động nộp</b>.</div>'+
+  '<button class="btn" onclick="closeModal();'+(CFG.forceFs?'enterFs();':'')+'">Tôi đã hiểu — Tiếp tục làm bài</button>');
+}
+
+/* ---------- GIAO DIỆN LÀM BÀI ---------- */
+function runnerHTML(){
+ const q=EX.qs[EX.i],n=EX.qs.length,answered=EX.qs.filter(x=>x.ans!==null).length;
+ return '<div id="examBar">'+
+  '<div><div style="font-size:11.5px;color:var(--gray);font-weight:700">MÃ ĐỀ</div><b style="color:var(--navy)">'+EX.code+'</b></div>'+
+  '<div><div style="font-size:11.5px;color:var(--gray);font-weight:700">CÂU</div><b>'+(EX.i+1)+' / '+n+'</b></div>'+
+  '<div class="pbar"><i style="width:'+Math.round(answered/n*100)+'%"></i></div>'+
+  '<div class="vcount" id="vcount">'+(EX.viol?"⚠ Vi phạm: "+EX.viol+"/"+CFG.maxViol:"Giám sát: đang hoạt động")+'</div>'+
+  '<div id="clock" class="'+(EX.left<=60?"danger":"")+'">'+mmss(Math.max(0,EX.left))+'</div>'+
+ '</div>'+
+ '<div class="qbox">'+
+  '<div class="qhead"><span class="pill n">Chương '+q.ch+' — '+esc(CH_NAME[q.ch])+'</span>'+
+   (CFG.lockBack?'<span class="pill y">Không quay lại câu trước</span>':'')+'</div>'+
+  '<div class="qtext">Câu '+(EX.i+1)+'. '+esc(q.q)+'</div>'+
+  q.o.map((o,j)=>'<div class="opt'+(q.ans===j?" sel":"")+'" onclick="pick('+j+')"><span class="k">'+"ABCD"[j]+'</span>'+esc(o)+'</div>').join("")+
+  '<div style="display:flex;gap:10px;margin-top:16px;flex-wrap:wrap">'+
+   (CFG.lockBack||EX.i===0?'':'<button class="btn btn-sm btn-ghost" onclick="navQ(-1)">← Câu trước</button>')+
+   (EX.i<EX.qs.length-1?'<button class="btn btn-sm" onclick="navQ(1)">Câu tiếp theo →</button>':'')+
+   '<button class="btn btn-sm btn-red" onclick="askSubmit()">NỘP BÀI</button>'+
+  '</div>'+
+  '<div style="font-size:12px;color:var(--gray);margin-top:12px">Đã trả lời '+answered+'/'+n+' câu. Câu chưa chọn phương án sẽ được tính là sai.</div>'+
+ '</div>';
+}
+function pick(j){
+ const q=EX.qs[EX.i];
+ if(CFG.lockBack&&q.ans!==null)return;
+ q.ans=j;
+ if(CFG.lockBack){ if(EX.i<EX.qs.length-1){EX.i++;$("view").innerHTML=runnerHTML();} else {$("view").innerHTML=runnerHTML();} }
+ else $("view").innerHTML=runnerHTML();
+}
+function navQ(d){
+ const t=EX.i+d;if(t<0||t>=EX.qs.length)return;EX.i=t;$("view").innerHTML=runnerHTML();
+}
+function askSubmit(){
+ const un=EX.qs.filter(x=>x.ans===null).length;
+ modal('<h3 style="color:var(--navy)">Xác nhận nộp bài</h3>'+
+  '<p style="font-size:14.5px;margin-bottom:10px">Bạn đã trả lời <b>'+(EX.qs.length-un)+'/'+EX.qs.length+'</b> câu.'+(un?' Còn <b style="color:var(--red)">'+un+' câu chưa trả lời</b> và sẽ bị tính là sai.':'')+'</p>'+
+  '<div class="note">Sau khi nộp, bài thi không thể tiếp tục. Bạn có thể thi lại với đề mới sau '+CFG.cooldown+' phút.</div>'+
+  '<div style="display:flex;gap:10px;margin-top:14px"><button class="btn btn-ghost" onclick="closeModal()">Quay lại làm bài</button><button class="btn btn-red" onclick="closeModal();submitExam(false)">Nộp bài ngay</button></div>');
+}
+
+/* ---------- CHẤM BÀI ---------- */
+function submitExam(auto,reason){
+ if(!EX||EX.done)return;
+ EX.done=true;EX.forced=!!auto;EX.reason=reason||"";
+ disarm();closeModal();
+ const c=CFG[EX.lv],total=EX.qs.length;
+ let right=0;const byCh={};
+ EX.qs.forEach(q=>{
+  byCh[q.ch]=byCh[q.ch]||{t:0,r:0};byCh[q.ch].t++;
+  if(q.ans===q.a){right++;byCh[q.ch].r++}
+ });
+ const pct=Math.round(right/total*1000)/10;
+ const cc=byCh[CFG.critCh]||{t:0,r:0};
+ const critPct=cc.t?Math.round(cc.r/cc.t*100):100;
+ const critOk=critPct>=CFG.critPct;
+ const pass=(pct>=c.pass)&&critOk&&!(EX.forced&&/ĐÌNH CHỈ/.test(EX.reason));
+ const used=Math.max(1,Math.round((Date.now()-EX.start)/1000));
+ const rec={at:Date.now(),name:me.name,code:me.code,dept:me.dept,lv:EX.lv,paper:EX.code,total:total,right:right,pct:pct,
+  pass:pass,critPct:critPct,critOk:critOk,used:used,viol:EX.viol,vlog:EX.vlog,forced:EX.forced,reason:EX.reason,
+  byCh:byCh,detail:EX.qs.map(q=>({id:q.id,ch:q.ch,ok:q.ans===q.a,ans:q.ans}))};
+ rec.vcode=hash(rec.name+"|"+rec.paper+"|"+rec.right+"|"+rec.at);
+ const log=getLog();log.push(rec);putLog(log);
+ EX=null;go("result",log.length-1);
+}
+
+/* ---------- PHIẾU KẾT QUẢ ---------- */
+function viewResult(idx){
+ const log=getLog(),r=log[idx];if(!r)return viewHist();
+ const c=CFG[r.lv];
+ const rank=!r.pass?"KHÔNG ĐẠT":(r.pct>=90?"XUẤT SẮC":r.pct>=80?"KHÁ":"ĐẠT");
+ let chRows=Object.keys(CH_NAME).map(ch=>{const d=r.byCh[ch];if(!d)return"";
+   const p=Math.round(d.r/d.t*100);
+   return '<tr><td>Chương '+ch+' — '+CH_NAME[ch]+(ch==CFG.critCh?' <span class="pill r">Điều kiện liệt</span>':'')+'</td><td style="text-align:center">'+d.r+'/'+d.t+'</td><td style="text-align:center"><span class="pill '+(p>=80?"g":p>=60?"y":"r")+'">'+p+'%</span></td></tr>'}).join("");
+ let wrong=r.detail.filter(d=>!d.ok);
+ let wrongHtml="";
+ if(CFG.showReview&&wrong.length){
+  wrongHtml='<div class="card noprint"><h3 class="sec" style="margin-top:0">Các câu trả lời chưa đúng ('+wrong.length+' câu) — học lại</h3>'+
+  wrong.map(d=>{const q=QBANK.find(x=>x.id===d.id);if(!q)return"";
+   return '<div class="qbox" style="box-shadow:none;border:1px solid var(--line)"><div class="qhead"><span class="pill n">Chương '+q.ch+'</span><span style="font-size:11.5px;color:var(--gray)">'+q.id+'</span></div>'+
+   '<div class="qtext">'+esc(q.q)+'</div>'+
+   q.o.map((o,j)=>'<div class="opt'+(j===q.a?" correct":"")+'"><span class="k">'+"ABCD"[j]+'</span>'+esc(o)+'</div>').join("")+
+   '<div class="exp"><b>Giải thích:</b> '+esc(q.e)+' <span style="color:var(--gray)">('+esc(q.r)+')</span></div></div>'}).join("")+'</div>';
+ }
+ return '<div class="page-title">Phiếu kết quả kiểm tra</div><div class="page-sub">SAKOS-AI-NBL-EXM-001 · Mã đề '+r.paper+' · '+fmtDT(r.at)+'</div>'+
+ '<div class="res-banner '+(r.pass?"res-pass":"res-fail")+'">'+
+  '<div class="big-score">'+r.pct+'%</div>'+
+  '<div style="font-size:19px;font-weight:800;margin-top:6px">'+(r.pass?"✔ ĐẠT — Xếp loại "+rank:"✘ KHÔNG ĐẠT")+'</div>'+
+  '<div style="margin-top:6px;font-size:14px">Đúng '+r.right+'/'+r.total+' câu · Thời gian làm bài '+mmss(r.used)+' / '+c.min+':00</div>'+
+ '</div>'+
+ (r.forced?'<div class="warn"><b>Ghi chú của hệ thống giám sát:</b> '+esc(r.reason)+'</div>':'')+
+ (!r.critOk?'<div class="warn"><b>VI PHẠM ĐIỀU KIỆN LIỆT:</b> Phần Chương 11 (Rủi ro, bảo mật &amp; tuân thủ) chỉ đạt '+r.critPct+'%, dưới ngưỡng bắt buộc '+CFG.critPct+'%. Kết quả toàn bài là KHÔNG ĐẠT, học viên phải học lại Chương 11 và kiểm tra lại.</div>':'')+
+ '<div class="card"><h3 class="sec" style="margin-top:0">Thông tin học viên</h3>'+
+ '<table class="data"><tr><td style="width:38%">Họ và tên</td><td><b>'+esc(r.name)+'</b></td></tr>'+
+ '<tr><td>Mã nhân viên</td><td>'+esc(r.code||"—")+'</td></tr>'+
+ '<tr><td>Bộ phận</td><td>'+esc(r.dept)+'</td></tr>'+
+ '<tr><td>Cấp bậc dự thi</td><td>'+(r.lv==="QL"?"CẤP QUẢN LÝ":"CẤP NHÂN VIÊN")+' — '+r.total+' câu / '+c.min+' phút · Ngưỡng đạt '+c.pass+'%</td></tr>'+
+ '<tr><td>Số lần vi phạm quy chế</td><td>'+(r.viol?'<span class="pill r">'+r.viol+' lần</span>':'<span class="pill g">Không có</span>')+'</td></tr>'+
+ '<tr><td>Mã xác thực kết quả</td><td><span class="code-box">'+r.vcode+'</span> <span style="font-size:12px;color:var(--gray)">(dùng để đối chiếu khi nộp về Phòng Nhân sự)</span></td></tr></table></div>'+
+ '<div class="card"><h3 class="sec" style="margin-top:0">Kết quả theo chương</h3><table class="data"><tr><th>Chương</th><th style="text-align:center">Đúng/Tổng</th><th style="text-align:center">Tỷ lệ</th></tr>'+chRows+'</table></div>'+
+ (r.vlog&&r.vlog.length?'<div class="card"><h3 class="sec" style="margin-top:0">Nhật ký giám sát</h3><table class="data"><tr><th>Lần</th><th>Thời điểm</th><th>Sự kiện</th></tr>'+
+  r.vlog.map(v=>'<tr><td>'+v.n+'</td><td>'+fmtDT(v.t)+'</td><td>'+esc(v.r)+'</td></tr>').join("")+'</table></div>':'')+
+ '<div class="card noprint"><div style="display:flex;gap:10px;flex-wrap:wrap">'+
+  '<button class="btn btn-sm" onclick="window.print()">🖨️ In / Lưu PDF phiếu kết quả</button>'+
+  '<button class="btn btn-sm btn-green" onclick="exportOne('+idx+')">📄 Xuất phiếu kết quả (.xls)</button>'+
+  '<button class="btn btn-sm btn-ghost" onclick="go(\'hist\')">Xem lịch sử thi</button>'+
+  '<button class="btn btn-sm btn-gold" onclick="go(\'exam\')">Thi lại (đề mới)</button>'+
+ '</div></div>'+wrongHtml+
+ '<div class="card" style="text-align:center;font-size:13px;color:var(--gray)">Xác nhận của Cán bộ đào tạo / Trưởng bộ phận: ..................................................<br><br>Ngày ...... tháng ...... năm 20......</div>';
+}
+
+/* ============================================================
+   LỊCH SỬ & XUẤT DỮ LIỆU
+   ============================================================ */
+function viewHist(){
+ const log=getLog();
+ if(!log.length)return '<div class="page-title">Kết quả &amp; lịch sử</div><div class="card" style="text-align:center;color:var(--gray);padding:40px">Chưa có lần thi nào được ghi nhận trên máy này.<br><br><button class="btn btn-sm" onclick="go(\'exam\')">Vào phòng thi</button></div>';
+ const mine=log.filter(x=>x.name===me.name);
+ const best=mine.length?Math.max.apply(null,mine.map(x=>x.pct)):0;
+ return '<div class="page-title">Kết quả &amp; lịch sử thi</div><div class="page-sub">Dữ liệu lưu tại trình duyệt của máy này</div>'+
+ '<div class="stat-row"><div class="stat"><div class="num">'+mine.length+'</div><div class="lbl">Lần thi của bạn</div></div>'+
+ '<div class="stat green"><div class="num">'+(mine.filter(x=>x.pass).length)+'</div><div class="lbl">Lần đạt</div></div>'+
+ '<div class="stat gold"><div class="num">'+best+'%</div><div class="lbl">Điểm cao nhất</div></div>'+
+ '<div class="stat blue"><div class="num">'+log.length+'</div><div class="lbl">Tổng bản ghi trên máy</div></div></div>'+
+ '<div class="card"><div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:12px">'+
+ '<button class="btn btn-sm btn-green" onclick="exportAll()">📊 Xuất toàn bộ kết quả (.xls)</button>'+
+ '<button class="btn btn-sm btn-ghost" onclick="if(confirm(\'Xóa toàn bộ lịch sử thi trên máy này? Không thể khôi phục.\')){putLog([]);go(\'hist\')}">🗑️ Xóa lịch sử</button></div>'+
+ histTable(log,true)+'</div>';
+}
+function histTable(log,withView){
+ return '<table class="data"><tr><th>#</th><th>Thời điểm</th><th>Họ tên</th><th>Cấp</th><th>Mã đề</th><th style="text-align:center">Điểm</th><th style="text-align:center">Ch.11</th><th style="text-align:center">Vi phạm</th><th style="text-align:center">Kết quả</th>'+(withView?'<th></th>':'')+'</tr>'+
+ log.map((r,i)=>'<tr><td>'+(i+1)+'</td><td>'+fmtDT(r.at)+'</td><td>'+esc(r.name)+'</td><td>'+r.lv+'</td><td>'+r.paper+'</td>'+
+ '<td style="text-align:center"><b>'+r.pct+'%</b></td><td style="text-align:center">'+r.critPct+'%</td>'+
+ '<td style="text-align:center">'+(r.viol?'<span class="pill r">'+r.viol+'</span>':'—')+'</td>'+
+ '<td style="text-align:center"><span class="pill '+(r.pass?"g":"r")+'">'+(r.pass?"ĐẠT":"KHÔNG ĐẠT")+'</span></td>'+
+ (withView?'<td><button class="btn btn-sm btn-ghost" onclick="go(\'result\','+i+')">Xem</button></td>':'')+'</tr>').join("")+'</table>';
+}
+function dl(name,html){
+ const blob=new Blob(["\ufeff"+html],{type:"application/vnd.ms-excel;charset=utf-8"});
+ const a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download=name;a.click();setTimeout(()=>URL.revokeObjectURL(a.href),3000);
+}
+function exportAll(){
+ const log=getLog();
+ let h='<html><head><meta charset="utf-8"></head><body><table border="1"><tr><th>STT</th><th>Thời điểm</th><th>Họ tên</th><th>Mã NV</th><th>Bộ phận</th><th>Cấp</th><th>Mã đề</th><th>Đúng</th><th>Tổng</th><th>Điểm %</th><th>Chương 11 %</th><th>Thời gian (phút)</th><th>Vi phạm</th><th>Kết quả</th><th>Mã xác thực</th><th>Ghi chú</th></tr>';
+ log.forEach((r,i)=>{h+='<tr><td>'+(i+1)+'</td><td>'+fmtDT(r.at)+'</td><td>'+esc(r.name)+'</td><td>'+esc(r.code||"")+'</td><td>'+esc(r.dept)+'</td><td>'+r.lv+'</td><td>'+r.paper+'</td><td>'+r.right+'</td><td>'+r.total+'</td><td>'+r.pct+'</td><td>'+r.critPct+'</td><td>'+(r.used/60).toFixed(1)+'</td><td>'+r.viol+'</td><td>'+(r.pass?"ĐẠT":"KHÔNG ĐẠT")+'</td><td>'+r.vcode+'</td><td>'+esc(r.reason||"")+'</td></tr>'});
+ dl("SAKOS-KetQuaThi-GeminiNotebook.xls",h+'</table></body></html>');
+}
+function exportOne(idx){
+ const r=getLog()[idx];if(!r)return;
+ let h='<html><head><meta charset="utf-8"></head><body>'+
+ '<table border="1"><tr><td colspan="3"><b>PHIẾU KẾT QUẢ KIỂM TRA NĂNG LỰC GEMINI NOTEBOOK (NotebookLM)</b></td></tr>'+
+ '<tr><td colspan="3">SAKOS-AI-NBL-EXM-001 · Công ty CP SAKOS</td></tr>'+
+ '<tr><td>Họ và tên</td><td colspan="2">'+esc(r.name)+'</td></tr>'+
+ '<tr><td>Mã nhân viên</td><td colspan="2">'+esc(r.code||"")+'</td></tr>'+
+ '<tr><td>Bộ phận</td><td colspan="2">'+esc(r.dept)+'</td></tr>'+
+ '<tr><td>Cấp bậc dự thi</td><td colspan="2">'+(r.lv==="QL"?"CẤP QUẢN LÝ":"CẤP NHÂN VIÊN")+'</td></tr>'+
+ '<tr><td>Thời điểm thi</td><td colspan="2">'+fmtDT(r.at)+'</td></tr>'+
+ '<tr><td>Mã đề</td><td colspan="2">'+r.paper+'</td></tr>'+
+ '<tr><td>Kết quả</td><td colspan="2">'+r.right+'/'+r.total+' = '+r.pct+'% — '+(r.pass?"ĐẠT":"KHÔNG ĐẠT")+'</td></tr>'+
+ '<tr><td>Chương 11 (điều kiện liệt)</td><td colspan="2">'+r.critPct+'% (ngưỡng '+CFG.critPct+'%)</td></tr>'+
+ '<tr><td>Thời gian làm bài</td><td colspan="2">'+mmss(r.used)+'</td></tr>'+
+ '<tr><td>Số lần vi phạm quy chế</td><td colspan="2">'+r.viol+(r.reason?" — "+esc(r.reason):"")+'</td></tr>'+
+ '<tr><td>Mã xác thực</td><td colspan="2">'+r.vcode+'</td></tr>'+
+ '<tr><td colspan="3"><b>KẾT QUẢ THEO CHƯƠNG</b></td></tr><tr><td>Chương</td><td>Đúng/Tổng</td><td>Tỷ lệ %</td></tr>';
+ Object.keys(CH_NAME).forEach(ch=>{const d=r.byCh[ch];if(d)h+='<tr><td>Ch.'+ch+' — '+CH_NAME[ch]+'</td><td>'+d.r+'/'+d.t+'</td><td>'+Math.round(d.r/d.t*100)+'</td></tr>'});
+ if(r.vlog&&r.vlog.length){h+='<tr><td colspan="3"><b>NHẬT KÝ GIÁM SÁT</b></td></tr>';r.vlog.forEach(v=>{h+='<tr><td>Lần '+v.n+'</td><td>'+fmtDT(v.t)+'</td><td>'+esc(v.r)+'</td></tr>'});}
+ dl("PhieuKetQua-"+r.name.replace(/\s+/g,"")+"-"+r.paper+".xls",h+'</table></body></html>');
+}
+
+/* ============================================================
+   QUẢN TRỊ (CÁN BỘ ĐÀO TẠO)
+   ============================================================ */
+let adminOk=false;
+function viewAdmin(){
+ if(!adminOk)return '<div class="page-title">Quản trị hệ thống thi</div><div class="page-sub">Dành cho Cán bộ đào tạo / Ban Chuyển đổi số &amp; Ứng dụng AI</div>'+
+  '<div class="card" style="max-width:420px"><div class="field"><label>Mã quản trị</label><input type="password" id="pin" placeholder="Nhập mã quản trị"></div>'+
+  '<button class="btn" onclick="if($(\'pin\').value===CFG.adminPin){adminOk=true;go(\'admin\')}else{$(\'aErr\').textContent=\'Mã quản trị không đúng.\'}">Mở khóa</button><div class="err" id="aErr"></div>'+
+  '<div class="note" style="margin-top:12px">Mã mặc định: <b>sakos2026</b> — Cán bộ đào tạo nên đổi mã trước khi phát hành file cho học viên.</div></div>';
+ const c=CFG;
+ return '<div class="page-title">Quản trị hệ thống thi</div><div class="page-sub">Thay đổi có hiệu lực cho các lần thi tiếp theo trên máy này</div>'+
+ '<div class="card"><h3 class="sec" style="margin-top:0">Tham số kỳ thi</h3><div class="grid2">'+
+ numF("QL.min","Thời gian đề Quản lý (phút)",c.QL.min)+numF("QL.pass","Ngưỡng đạt Quản lý (%)",c.QL.pass)+
+ numF("NV.min","Thời gian đề Nhân viên (phút)",c.NV.min)+numF("NV.pass","Ngưỡng đạt Nhân viên (%)",c.NV.pass)+
+ numF("critPct","Ngưỡng điều kiện liệt Chương 11 (%)",c.critPct)+numF("maxViol","Số lần vi phạm tối đa",c.maxViol)+
+ numF("cooldown","Thời gian chờ giữa 2 lần thi (phút)",c.cooldown)+
+ '</div><div style="margin-top:12px">'+
+ chkF("forceFs","Bắt buộc chế độ toàn màn hình",c.forceFs)+
+ chkF("lockBack","Không cho quay lại câu đã trả lời",c.lockBack)+
+ chkF("showReview","Cho xem lại câu sai sau khi nộp bài",c.showReview)+
+ '</div><div class="field" style="max-width:320px;margin-top:12px"><label>Đổi mã quản trị</label><input id="f_adminPin" value="'+esc(c.adminPin)+'"></div>'+
+ '<button class="btn btn-sm btn-green" onclick="saveAdmin()">💾 Lưu cấu hình</button> '+
+ '<button class="btn btn-sm btn-ghost" onclick="if(confirm(\'Khôi phục toàn bộ tham số mặc định?\')){CFG=Object.assign({},DEF_CFG);saveCfg();go(\'admin\')}">Khôi phục mặc định</button>'+
+ '<div class="err" id="sErr" style="text-align:left"></div></div>'+
+ '<div class="card"><h3 class="sec" style="margin-top:0">Thống kê ngân hàng câu hỏi</h3><table class="data"><tr><th>Chương</th><th>Nội dung</th><th style="text-align:center">Số câu</th><th style="text-align:center">Đề QL</th><th style="text-align:center">Đề NV</th></tr>'+
+ Object.keys(CH_NAME).map(ch=>'<tr><td>Chương '+ch+'</td><td>'+CH_NAME[ch]+'</td><td style="text-align:center">'+QBANK.filter(q=>q.ch==ch).length+'</td><td style="text-align:center">'+(c.QL.matrix[ch]||0)+'</td><td style="text-align:center">'+(c.NV.matrix[ch]||0)+'</td></tr>').join("")+
+ '<tr><td colspan="2"><b>TỔNG</b></td><td style="text-align:center"><b>'+QBANK.length+'</b></td><td style="text-align:center"><b>'+c.QL.n+'</b></td><td style="text-align:center"><b>'+c.NV.n+'</b></td></tr></table></div>'+
+ '<div class="card"><h3 class="sec" style="margin-top:0">Hướng dẫn phát hành</h3>'+
+ '<div class="info">① Đổi mã quản trị và điều chỉnh tham số nếu cần → ② Gửi file HTML này cho từng học viên (email/USB/Zalo) → ③ Học viên mở bằng trình duyệt (Chrome/Edge), khai báo thông tin và làm bài → ④ Sau khi thi, học viên bấm <b>Xuất phiếu kết quả (.xls)</b> và gửi về Phòng Nhân sự kèm <b>mã xác thực</b>.</div>'+
+ '<div class="note">Lưu ý: dữ liệu bài thi lưu trên chính máy của học viên. Cấu hình do quản trị đặt trên máy này KHÔNG tự truyền sang máy khác — nếu cần thống nhất tham số toàn Công ty, hãy chỉnh trong file gốc trước khi phát hành.</div></div>';
+}
+const numF=(k,l,v)=>'<div class="field"><label>'+l+'</label><input type="number" id="f_'+k.replace(".","_")+'" value="'+v+'"></div>';
+const chkF=(k,l,v)=>'<label style="display:block;font-size:14px;margin-bottom:8px"><input type="checkbox" id="f_'+k+'" '+(v?"checked":"")+' style="width:17px;height:17px;vertical-align:-3px;margin-right:8px">'+l+'</label>';
+function saveAdmin(){
+ const g=id=>$("f_"+id)?+$("f_"+id).value:null;
+ CFG.QL.min=g("QL_min");CFG.QL.pass=g("QL_pass");CFG.NV.min=g("NV_min");CFG.NV.pass=g("NV_pass");
+ CFG.critPct=g("critPct");CFG.maxViol=g("maxViol");CFG.cooldown=g("cooldown");
+ CFG.forceFs=$("f_forceFs").checked;CFG.lockBack=$("f_lockBack").checked;CFG.showReview=$("f_showReview").checked;
+ CFG.adminPin=$("f_adminPin").value||DEF_CFG.adminPin;
+ saveCfg();$("sErr").innerHTML='<span style="color:var(--green)">✔ Đã lưu cấu hình.</span>';
+}
+
+/* ============================================================
+   KHỞI ĐỘNG
+   ============================================================ */
+(function(){
+ try{const u=JSON.parse(localStorage.getItem(K_USER)||"null");if(u&&u.name&&u.lv){me=u;startApp()}}catch(e){}
+})();
+</script>
+</body></html>
